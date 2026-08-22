@@ -74,3 +74,10 @@ def test_listar_solicitudes_agota_reintentos_con_429_tiene_mensaje_claro(mock_ge
     error_msg = str(exc_info.value)
     assert "HTTP 429" in error_msg
     assert "None" not in error_msg
+
+
+@patch("src.cliente_mock.time.sleep", return_value=None)
+@patch("src.cliente_mock.requests.get", side_effect=requests.exceptions.ConnectionError("Connection refused"))
+def test_listar_solicitudes_falla_con_mensaje_claro_si_servicio_caido(mock_get, _mock_sleep):
+    with pytest.raises(ServicioMockError, match="no respondió correctamente"):
+        listar_solicitudes()

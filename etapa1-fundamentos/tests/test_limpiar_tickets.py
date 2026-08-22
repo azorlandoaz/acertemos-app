@@ -66,3 +66,25 @@ def test_main_archivo_vacio(tmp_path):
     resumen = json.loads(resumen_json.read_text(encoding="utf-8"))
     assert resumen["total_validos"] == 0
     assert not csv_salida.exists()
+
+
+def test_main_escribe_reporte_de_descartes(tmp_path):
+    csv_entrada = tmp_path / "entrada.csv"
+    csv_entrada.write_text(
+        "id,fecha_creacion,fecha_cierre,area,categoria,prioridad,canal,"
+        "solicitante,asunto,descripcion,estado,reaperturas\n"
+        "TK-1,2025-03-08,,Compras,Hardware,Alta,correo,u1@x.com,Asunto,Desc,Abierto,0\n"
+        "TK-2,2025-03-08,,,Hardware,Alta,correo,u2@x.com,Asunto,Desc,Abierto,0\n",
+        encoding="utf-8",
+    )
+    csv_salida = tmp_path / "salida.csv"
+    resumen_json = tmp_path / "resumen.json"
+
+    main([str(csv_entrada), str(csv_salida), str(resumen_json)])
+
+    ruta_descartados = tmp_path / "tickets_descartados.csv"
+    assert ruta_descartados.exists()
+    with ruta_descartados.open(encoding="utf-8") as fh:
+        filas = list(csv.DictReader(fh))
+    assert len(filas) == 1
+    assert filas[0]["_motivo_descarte"] == "area vacía"

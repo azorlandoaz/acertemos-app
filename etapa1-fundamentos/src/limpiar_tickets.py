@@ -53,6 +53,14 @@ def main(argv: list[str]) -> None:
             writer.writeheader()
             writer.writerows(validos)
 
+    if descartados:
+        ruta_descartados = ruta_salida.parent / "tickets_descartados.csv"
+        campos_descartados = list(descartados[0].keys())
+        with ruta_descartados.open("w", encoding="utf-8", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=campos_descartados)
+            writer.writeheader()
+            writer.writerows(descartados)
+
     resumen = generar_resumen(validos)
     resumen["total_validos"] = len(validos)
     resumen["total_descartados"] = len(descartados)

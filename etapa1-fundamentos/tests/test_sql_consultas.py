@@ -28,6 +28,5 @@ def test_consulta_sql_ejecuta_sin_error(conexion, archivo_sql, columnas_esperada
     with conexion.cursor() as cursor:
         cursor.execute(consulta)
         filas = cursor.fetchall()
-    assert isinstance(filas, list)
-    if filas:
-        assert set(filas[0].keys()) == columnas_esperadas
+    assert filas, f"{archivo_sql} no devolvió filas"
+    assert set(filas[0].keys()) == columnas_esperadas

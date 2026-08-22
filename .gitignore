@@ -25,6 +25,11 @@ htmlcov/
 .chroma/
 *.sqlite3
 
+# Salidas generadas por el script de limpieza (Etapa 1)
+materiales/datos/tickets_limpios.csv
+materiales/datos/resumen_por_area_prioridad.json
+materiales/datos/tickets_descartados.csv
+
 # Editor / SO
 .vscode/
 .idea/

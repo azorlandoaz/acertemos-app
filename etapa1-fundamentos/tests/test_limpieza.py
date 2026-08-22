@@ -1,4 +1,9 @@
-from src.limpieza import deduplicar
+from src.limpieza import (
+    deduplicar,
+    generar_resumen,
+    validar_registro,
+    validar_registros,
+)
 
 
 def test_deduplicar_elimina_repetidos():
@@ -20,9 +25,6 @@ def test_deduplicar_lista_vacia():
     unicos, eliminados = deduplicar([])
     assert unicos == []
     assert eliminados == 0
-
-
-from src.limpieza import validar_registro, validar_registros
 
 
 def test_validar_registro_valido():
@@ -60,9 +62,6 @@ def test_validar_registros_archivo_vacio():
     validos, descartados = validar_registros([])
     assert validos == []
     assert descartados == []
-
-
-from src.limpieza import generar_resumen
 
 
 def test_generar_resumen_cuenta_por_area_y_prioridad():
