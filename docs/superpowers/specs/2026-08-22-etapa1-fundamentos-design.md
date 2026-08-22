@@ -7,10 +7,12 @@ Carpeta: `etapa1-fundamentos/`.
 ## 1. Objetivo
 
 Producir un script Python que limpie el histórico de tickets, un cliente
-robusto del `servicio_mock`, tres consultas SQL sobre `esquema.sql`, y la
-disciplina de Git/pruebas/documentación que sostiene el resto de la prueba.
-Es la única etapa que **no puede fallar el mínimo** sin invalidar todo lo
-demás (regla 3 del Anexo A).
+robusto del `servicio_mock`, una base de datos dockerizada a partir de
+`esquema.sql` con pruebas que verifiquen que el script realmente crea el
+esquema esperado, tres consultas SQL de análisis, y la disciplina de
+Git/pruebas/documentación que sostiene el resto de la prueba. Es la única
+etapa que **no puede fallar el mínimo** sin invalidar todo lo demás (regla 3
+del Anexo A).
 
 ## 2. Rúbrica de la etapa
 
@@ -39,7 +41,12 @@ documentación mínima. 8 criterios × 0-4 = 100 pts, mínimo 60.
 - `datos/esquema.sql`: tablas `areas, usuarios, tickets, adjuntos,
   historial_estado`, con FKs, **sin índices a propósito** (el enunciado
   invita a proponerlos si se justifican — nota para el README, no
-  obligatorio).
+  obligatorio). El propio archivo indica que está "verificado en
+  MySQL/MariaDB" — se dockeriza con la imagen oficial `mariadb`, montando
+  `esquema.sql` en `/docker-entrypoint-initdb.d/` para que la imagen lo
+  ejecute automáticamente al crear el volumen por primera vez. Esa
+  ejecución automática **es** la comprobación de que el script funciona:
+  si tiene un error de sintaxis, el contenedor nunca llega a `healthy`.
 - `servicio_mock/`: FastAPI en `localhost:8080`. Requiere
   `Authorization: Bearer <token>` (vía env, nunca hardcodeado). Endpoints
   relevantes: `GET /solicitudes`, `POST /solicitudes` (soporta header
@@ -58,11 +65,11 @@ documentación mínima. 8 criterios × 0-4 = 100 pts, mínimo 60.
 | 6 | Validación de registros | Fila inválida = fecha no parseable, `area` vacía, o `id` vacío; separar en un reporte de descartes en vez de silenciarlas. | corrección y manejo de errores | test con fila corrupta / archivo vacío (caso de borde) |
 | 7 | Script principal | `limpiar_tickets.py`: orquesta 3-6, produce `tickets_limpios.csv` + `resumen_por_area_prioridad.json` (conteo por área y por prioridad). | cumplimiento funcional | ejecución de punta a punta contra el CSV real |
 | 8 | Cliente del `servicio_mock` | `cliente_mock.py`: `GET /solicitudes` y `POST /solicitudes`, timeout configurable, reintento en `429` respetando `Retry-After`, backoff exponencial en `500` (máx. N intentos), mensaje de error comprensible si se agotan los reintentos. | consumo de API REST | test con servidor mock real corriendo, y test con mocks de `requests` para 429/500 |
-| 9 | Consulta SQL 1 — agregación por área | `SELECT` de conteo de tickets por área (posiblemente con `JOIN` a `areas` para el nombre). | SQL | archivo `.sql` versionado + resultado de ejemplo en README |
-| 10 | Consulta SQL 2 — join de 3 tablas | `tickets` + `areas` + `usuarios` (o `adjuntos`/`historial_estado`), con criterio de negocio claro (p. ej. tickets con adjuntos por área y responsable). | SQL | idem |
-| 11 | Consulta SQL 3 — tickets reabiertos | Vía `historial_estado.estado_nuevo = 'Reabierto'` o `tickets.reaperturas > 0`; justificar cuál fuente se usó y por qué. | SQL | idem |
-| 12 | Pruebas unitarias | Mínimo 3 funciones cubiertas (parser de fechas, normalización, dedupe o validación), con al menos un caso de borde por función (fecha vacía, archivo vacío, fila sin `area`). | pruebas unitarias | `pytest` verde en CI local |
-| 13 | README de la etapa | Cómo instalar, cómo ejecutar, qué hace, qué se supuso (p. ej. regla de deduplicación elegida), qué quedó fuera si aplica. | documentación mínima | archivo `etapa1-fundamentos/README.md` |
+| 9 | Dockerización de la base de datos | `docker/docker-compose.yml` con servicio `mariadb`, `.env.example` con credenciales de ejemplo, volumen montando `esquema.sql` en `/docker-entrypoint-initdb.d/`, `healthcheck` vía `mysqladmin ping`. | (transversal, soporta SQL y corrección) | `docker compose up -d` deja el servicio en estado `healthy` |
+| 10 | Helper de conexión + verificación de esquema | `src/db.py` con `obtener_conexion()` (reintento mientras el contenedor arranca). Pruebas que verifiquen: (a) el servicio de base de datos responde (`SELECT 1`), (b) existen las 5 tablas esperadas, (c) cada tabla tiene exactamente las columnas de `esquema.sql`, (d) los tipos de al menos una columna clave por tabla coinciden (`INT`→`int`, `VARCHAR`→`varchar`, `TEXT`→`text`, `DATETIME`→`datetime`, `CHAR`→`char`). | corrección y manejo de errores · SQL | `pytest` contra la base de datos dockerizada, verde |
+| 11 | Consultas SQL de análisis | 3 archivos `.sql` en `sql/`: agregación por área, join de 3 tablas, tickets reabiertos; con test que ejecuta cada uno contra la base dockerizada y verifica que corre sin error y devuelve las columnas esperadas. | SQL | `pytest` que ejecuta las 3 consultas contra la base de datos real |
+| 12 | Pruebas unitarias | Mínimo 3 funciones cubiertas (parser de fechas, normalización, dedupe o validación), con al menos un caso de borde por función (fecha vacía, archivo vacío, fila sin `area`) — además de las pruebas de esquema y SQL de las tareas 10-11. | pruebas unitarias | `pytest` verde en CI local |
+| 13 | README de la etapa | Cómo instalar, cómo levantar la base de datos con Docker, cómo ejecutar, qué hace, qué se supuso (p. ej. regla de deduplicación elegida), qué quedó fuera si aplica. | documentación mínima | archivo `etapa1-fundamentos/README.md` |
 | 14 | Commits atómicos | Al menos 8 commits distribuidos por tarea (no uno por archivo suelto ni uno gigante al final). | uso de Git | `git log` de la rama |
 
 ## 5. Errores y casos de borde explícitos a manejar
@@ -73,13 +80,23 @@ documentación mínima. 8 criterios × 0-4 = 100 pts, mínimo 60.
 - `fecha_cierre` vacía en ticket abierto → válido, no es error.
 - `servicio_mock` caído (connection refused) además de 429/500 → mensaje
   distinto y claro para cada caso.
+- Contenedor de base de datos aún no listo (arranque lento) → el helper de
+  conexión reintenta con espera, no falla al primer intento.
+- `esquema.sql` con un error de sintaxis → el contenedor nunca llega a
+  `healthy`; se documenta cómo diagnosticarlo (`docker compose logs`).
 
 ## 6. Definición de "hecho" (Definition of Done)
 
 - `python -m pytest` verde localmente.
-- `python src/limpiar_tickets.py materiales/datos/tickets_historicos.csv`
+- `python -m src.limpiar_tickets materiales/datos/tickets_historicos.csv`
   corre sin excepciones y produce ambos archivos de salida.
-- Las 3 consultas SQL corren contra `esquema.sql` cargado en una instancia
-  local (SQLite/MySQL) sin error de sintaxis.
-- README completo según sección 4, tarea 13.
+- `docker compose up -d` (en `etapa1-fundamentos/docker/`) deja el servicio
+  de base de datos en estado `healthy`, cargando `esquema.sql`
+  automáticamente.
+- Las pruebas de esquema confirman que existen las 5 tablas con sus
+  columnas y tipos correctos, y que el servicio de base de datos responde.
+- Las 3 consultas SQL de análisis corren contra la base de datos dockerizada
+  sin error y devuelven las columnas esperadas.
+- README completo según sección 4, tarea 13 (incluye instrucciones de
+  Docker).
 - ≥8 commits atómicos en `etapa1-fundamentos`.
