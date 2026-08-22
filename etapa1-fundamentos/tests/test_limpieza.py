@@ -60,3 +60,22 @@ def test_validar_registros_archivo_vacio():
     validos, descartados = validar_registros([])
     assert validos == []
     assert descartados == []
+
+
+from src.limpieza import generar_resumen
+
+
+def test_generar_resumen_cuenta_por_area_y_prioridad():
+    tickets = [
+        {"area": "Compras", "prioridad": "Alta"},
+        {"area": "Compras", "prioridad": "Baja"},
+        {"area": "Calidad", "prioridad": "Alta"},
+    ]
+    resumen = generar_resumen(tickets)
+    assert resumen["por_area"] == {"Compras": 2, "Calidad": 1}
+    assert resumen["por_prioridad"] == {"Alta": 2, "Baja": 1}
+
+
+def test_generar_resumen_lista_vacia():
+    resumen = generar_resumen([])
+    assert resumen == {"por_area": {}, "por_prioridad": {}}

@@ -43,3 +43,15 @@ def validar_registros(tickets: list[dict]) -> tuple[list[dict], list[dict]]:
             descartado["_motivo_descarte"] = motivo
             descartados.append(descartado)
     return validos, descartados
+
+
+def generar_resumen(tickets: list[dict]) -> dict:
+    """Cuenta tickets por área y por prioridad."""
+    por_area: dict[str, int] = {}
+    por_prioridad: dict[str, int] = {}
+    for t in tickets:
+        area = t.get("area") or "Sin área"
+        prioridad = t.get("prioridad") or "Sin prioridad"
+        por_area[area] = por_area.get(area, 0) + 1
+        por_prioridad[prioridad] = por_prioridad.get(prioridad, 0) + 1
+    return {"por_area": por_area, "por_prioridad": por_prioridad}
