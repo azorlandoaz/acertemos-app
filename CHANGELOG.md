@@ -14,3 +14,4 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - Spec de Etapa 1 ampliado con dockerización de la base de datos (MariaDB vía Docker Compose montando `esquema.sql`) y pruebas automatizadas que verifican tablas, columnas y disponibilidad del servicio.
+- Spec de Etapa 2 ampliado con dockerización de los 3 servicios (API, MariaDB, `servicio_mock`), documentación servida como Swagger UI interactivo en `/docs`, y un nuevo archivo `docs/roles-y-contratos.md` con matriz de roles/permisos y contrato por endpoint, respaldado por un middleware de autorización ligero por header `X-Role`.
