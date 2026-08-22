@@ -32,6 +32,10 @@ def _con_reintentos(fn_peticion):
             continue
 
         if respuesta.status_code == 429:
+            ultimo_error = (
+                f"HTTP 429 (límite de tasa), "
+                f"Retry-After={respuesta.headers.get('Retry-After', 1)}s"
+            )
             espera = float(respuesta.headers.get("Retry-After", 1))
             time.sleep(espera)
             continue
@@ -39,6 +43,13 @@ def _con_reintentos(fn_peticion):
             ultimo_error = f"HTTP {respuesta.status_code}: {respuesta.text}"
             time.sleep(2 ** intento * 0.1)
             continue
+
+        # Non-retryable 4xx responses: raise immediately
+        if respuesta.status_code >= 400:
+            raise ServicioMockError(
+                f"El servicio_mock respondió con error de cliente: "
+                f"HTTP {respuesta.status_code}: {respuesta.text}"
+            )
 
         return respuesta
 
@@ -61,7 +72,6 @@ def listar_solicitudes(area: str | None = None, estado: str | None = None) -> li
         )
 
     respuesta = _con_reintentos(peticion)
-    respuesta.raise_for_status()
     return respuesta.json()
 
 
@@ -80,5 +90,4 @@ def crear_solicitud(datos: dict, clave_idempotencia: str | None = None) -> dict:
         )
 
     respuesta = _con_reintentos(peticion)
-    respuesta.raise_for_status()
     return respuesta.json()
