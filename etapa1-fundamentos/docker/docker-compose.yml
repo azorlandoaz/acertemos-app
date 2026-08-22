@@ -13,7 +13,7 @@ services:
       - db_data:/var/lib/mysql
       - ../../materiales/datos/esquema.sql:/docker-entrypoint-initdb.d/01-esquema.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MARIADB_ROOT_PASSWORD --silent"]
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -uroot -p$$MARIADB_ROOT_PASSWORD --silent"]
       interval: 5s
       timeout: 5s
       retries: 10
