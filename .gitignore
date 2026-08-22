@@ -1,0 +1,36 @@
+# Dependencias
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Builds
+dist/
+build/
+*.tsbuildinfo
+
+# Secretos y entornos locales
+.env
+.env.*
+!.env.example
+
+# Datos generados / caches
+.pytest_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+*.log
+.chroma/
+*.sqlite3
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Archivos personales de trabajo, fuera del alcance de la entrega
+global_rules.md
+Steps.md
