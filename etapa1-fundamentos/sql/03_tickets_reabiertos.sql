@@ -1,11 +1,12 @@
--- Tickets que registran al menos una reapertura en su historial de estado.
-SELECT DISTINCT
-    t.codigo,
-    t.estado,
-    COUNT(h.id_historial) AS veces_reabierto
-FROM tickets t
-JOIN historial_estado h
-    ON h.id_ticket = t.id_ticket
-    AND h.estado_nuevo = 'Reabierto'
-GROUP BY t.codigo, t.estado
-ORDER BY veces_reabierto DESC;
+-- Tickets que registran al menos una reapertura, según el contador
+-- autoritativo tickets.reaperturas (historial_estado no guarda un log
+-- completo de reaperturas en este dataset: registra un ciclo de vida fijo
+-- de 3 filas por ticket, por lo que COUNT(...) sobre él no refleja el
+-- número real de reaperturas ni detecta todos los tickets reabiertos).
+SELECT
+    codigo,
+    estado,
+    reaperturas AS veces_reabierto
+FROM tickets
+WHERE reaperturas > 0
+ORDER BY reaperturas DESC;
