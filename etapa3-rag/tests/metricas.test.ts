@@ -22,7 +22,7 @@ describe("metricas", () => {
 
     const resumen = resumenMetricas();
     expect(resumen.totalLlamadas).toBe(3);
-    expect(resumen.tokensTotales).toBe(999); // roto a propósito para evidencia de CI
+    expect(resumen.tokensTotales).toBe(100);
     expect(resumen.latenciaP50).toBeGreaterThanOrEqual(100);
     expect(resumen.latenciaP95).toBeLessThanOrEqual(300);
   });
