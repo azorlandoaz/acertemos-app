@@ -47,3 +47,22 @@ describe("GET /solicitudes/:id", () => {
     expect(res.body).toEqual({ error: { code: "NO_ENCONTRADA", message: "Solicitud no encontrada" } });
   });
 });
+
+describe("GET /solicitudes", () => {
+  it("lista con filtro de area", async () => {
+    const app = crearApp();
+    await request(app).post("/solicitudes").send({ asunto: "Uno", descripcion: "", area: "Compras", solicitante: "a@x.com" });
+    await request(app).post("/solicitudes").send({ asunto: "Dos", descripcion: "", area: "Calidad", solicitante: "b@x.com" });
+
+    const res = await request(app).get("/solicitudes?area=Compras");
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0].area).toBe("Compras");
+  });
+
+  it("devuelve lista vacia (200, no error) si no hay resultados", async () => {
+    const res = await request(crearApp()).get("/solicitudes?area=NoExiste");
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+  });
+});
