@@ -1,0 +1,30 @@
+import request from "supertest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { crearApp } from "../../src/app.js";
+import { _reiniciar } from "../../src/store/solicitudesStore.js";
+
+beforeEach(() => {
+  _reiniciar();
+});
+
+describe("POST /solicitudes", () => {
+  it("crea una solicitud y devuelve 201 con el cuerpo creado", async () => {
+    const res = await request(crearApp())
+      .post("/solicitudes")
+      .send({ asunto: "El portátil no enciende", descripcion: "Desde ayer", area: "Operaciones", solicitante: "ana@lafortuna.com.co" });
+
+    expect(res.status).toBe(201);
+    expect(res.body.id).toBeTypeOf("string");
+    expect(res.body.asunto).toBe("El portátil no enciende");
+    expect(res.body.estado).toBe("Abierto");
+  });
+
+  it("devuelve 422 si falta un campo requerido", async () => {
+    const res = await request(crearApp())
+      .post("/solicitudes")
+      .send({ descripcion: "sin asunto", area: "Operaciones", solicitante: "ana@lafortuna.com.co" });
+
+    expect(res.status).toBe(422);
+    expect(res.body.error.code).toBe("ENTRADA_INVALIDA");
+  });
+});
