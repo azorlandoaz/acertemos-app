@@ -1,6 +1,17 @@
 import request from "supertest";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { crearApp } from "../../src/app.js";
+
+beforeAll(() => {
+  // cargarConfig() sigue exigiendo AI_PROVIDER_BASE_URL/AI_PROVIDER_API_KEY
+  // (fail-fast intencional del spec), aunque el endpoint use HeuristicProvider
+  // por defecto (Fix 1 de la revisión final de rama) y no los necesite en la
+  // práctica. Sin un .env presente (checkout nuevo, CI) esto hacia fallar
+  // estos tests con 500 antes de llegar a la lógica que se quiere probar.
+  // Se fijan valores dummy sin sobrescribir un .env real si existe.
+  process.env.AI_PROVIDER_BASE_URL ??= "http://localhost:11434/v1";
+  process.env.AI_PROVIDER_API_KEY ??= "test-key";
+});
 
 vi.mock("../../src/busqueda/vectorStore.js", async () => {
   const actual = await vi.importActual<typeof import("../../src/busqueda/vectorStore.js")>(
