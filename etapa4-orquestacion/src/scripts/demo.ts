@@ -2,6 +2,17 @@ import { ClasificadorService, HeuristicProvider } from "etapa2-api";
 import { ejecutarPipeline } from "../pipeline.js";
 import { marcarEstado } from "../estadoSync.js";
 
+/** Requiere que etapa4-orquestacion/data/indice_vectorial.json exista
+ * (mismo formato que etapa3-rag/data/indice_vectorial.json). responderConsulta()
+ * resuelve el índice vía process.cwd(), que al correr `npm run demo` desde
+ * etapa4-orquestacion/ NO coincide con etapa3-rag/ - ni `cd etapa4-orquestacion
+ * && npm run demo` ni `npm run demo --workspace etapa4-orquestacion` cambian
+ * esto (el flag --workspace no altera el cwd real del proceso). Antes de
+ * correr esta demo: `cp etapa3-rag/data/indice_vectorial.json
+ * etapa4-orquestacion/data/indice_vectorial.json` (o correr la ingesta real
+ * de Etapa 3 con ese destino) y asegurar que exista un `etapa4-orquestacion/.env`
+ * (aunque sea copiado de `.env.example`, ya que HeuristicProvider no usa
+ * esas credenciales pero cargarConfig() las exige igual). */
 const CASOS_DEMO = [
   { evento_id: "demo-1", pregunta: "¿Con cuánta anticipación debo pedir mis vacaciones?" },
   { evento_id: "demo-2", pregunta: "¿Cuál es la política de horarios de teletrabajo los viernes?" },
