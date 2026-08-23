@@ -17,6 +17,7 @@ describe("POST /solicitudes", () => {
     expect(res.body.id).toBeTypeOf("string");
     expect(res.body.asunto).toBe("El portátil no enciende");
     expect(res.body.estado).toBe("Abierto");
+    expect(["Vacaciones", "Sin clasificar", "Hardware", "Software", "Gestión de accesos", "Viáticos", "Conectividad", "Compras", "Incidentes"]).toContain(res.body.categoria);
   });
 
   it("devuelve 422 si falta un campo requerido", async () => {

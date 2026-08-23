@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { z } from "zod";
 import { AppError } from "../errors.js";
-import { crear, listar, obtenerPorId } from "../store/solicitudesStore.js";
+import { crear, listar, obtenerPorId, actualizarClasificacion } from "../store/solicitudesStore.js";
+import { ClasificadorService } from "../ia/ClasificadorService.js";
+import { HeuristicProvider } from "../ia/HeuristicProvider.js";
+import { HttpChatProvider } from "../ia/HttpChatProvider.js";
+import { cargarConfig } from "../config/env.js";
 
 export const solicitudesRouter = Router();
 
@@ -12,7 +16,21 @@ const EntradaSolicitud = z.object({
   solicitante: z.string().email("El solicitante debe ser un correo válido"),
 });
 
-solicitudesRouter.post("/", (req, res, next) => {
+const config = cargarConfig();
+const clasificador = new ClasificadorService(
+  new HttpChatProvider({
+    baseUrl: config.aiProviderBaseUrl,
+    apiKey: config.aiProviderApiKey,
+    modelo: config.aiProviderModel,
+    timeoutMs: config.aiTimeoutMs,
+  }),
+  new HeuristicProvider(),
+  config.aiTimeoutMs,
+  config.aiMaxReintentos
+);
+const UMBRAL_ESCALAMIENTO = 0.4;
+
+solicitudesRouter.post("/", async (req, res, next) => {
   const parseo = EntradaSolicitud.safeParse(req.body);
   if (!parseo.success) {
     return next(
@@ -20,7 +38,15 @@ solicitudesRouter.post("/", (req, res, next) => {
     );
   }
   const solicitud = crear(parseo.data);
-  res.status(201).json(solicitud);
+  const clasificacion = await clasificador.clasificar(`${solicitud.asunto} ${solicitud.descripcion}`);
+  const actualizada = actualizarClasificacion(
+    solicitud.id,
+    clasificacion.categoria,
+    clasificacion.confianza >= UMBRAL_ESCALAMIENTO ? "Media" : "Alta",
+    clasificacion.confianza,
+    UMBRAL_ESCALAMIENTO
+  );
+  res.status(201).json(actualizada);
 });
 
 solicitudesRouter.get("/:id", (req, res, next) => {
