@@ -25,7 +25,7 @@ vi.mock("etapa2-api", async () => {
     ...actual,
     HttpChatProvider: class {
       async embeber(textos: string[]) {
-        return textos.map(() => [1, 0, 0]);
+        return textos.map((t) => (t.includes("trabajar desde casa") ? [0, 1, 0] : [1, 0, 0]));
       }
       async generarRespuesta() {
         return "Debes solicitar tus vacaciones con 15 días calendario de anticipación.";
@@ -53,5 +53,15 @@ describe("POST /consultas", () => {
   it("devuelve 422 si la pregunta esta vacia", async () => {
     const res = await request(crearApp()).post("/consultas").send({ pregunta: "" });
     expect(res.status).toBe(422);
+  });
+
+  it("se abstiene (GS-003) cuando la similitud maxima cae bajo el umbral", async () => {
+    const res = await request(crearApp())
+      .post("/consultas")
+      .send({ pregunta: "¿Puedo trabajar desde casa tres días a la semana?" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.respuesta).toBe("No tengo evidencia en las políticas para responder esto.");
+    expect(res.body.citas).toEqual([]);
   });
 });

@@ -13,10 +13,18 @@ const EntradaConsulta = z.object({
 });
 
 let proveedorSingleton: HttpChatProvider | null = null;
+let configSingleton: ReturnType<typeof cargarConfig> | null = null;
+
+function obtenerConfig() {
+  if (!configSingleton) {
+    configSingleton = cargarConfig();
+  }
+  return configSingleton;
+}
 
 function obtenerProveedor(): HttpChatProvider {
   if (!proveedorSingleton) {
-    const config = cargarConfig();
+    const config = obtenerConfig();
     proveedorSingleton = new HttpChatProvider({
       baseUrl: config.aiProviderBaseUrl,
       apiKey: config.aiProviderApiKey,
@@ -41,11 +49,18 @@ consultasRouter.post("/", async (req, res, next) => {
   const [embeddingConsulta] = await obtenerProveedor().embeber([parseo.data.pregunta]);
   const resultados = buscar(indice, embeddingConsulta, 3);
 
-  const contexto = resultados.map((r) => r.entrada.texto);
-  const respuesta = await obtenerProveedor().generarRespuesta(parseo.data.pregunta, contexto);
-  const citas = resultados
-    .slice(0, 1)
-    .map((r) => ({ documento: r.entrada.documento, seccion: r.entrada.seccion }));
+  const similitudMaxima = resultados[0]?.similitud ?? 0;
+  let respuesta: string;
+  let citas: { documento: string; seccion: string }[];
 
-  res.json({ respuesta, citas, confianza: resultados[0]?.similitud ?? 0 });
+  if (similitudMaxima < obtenerConfig().umbralAbstencion) {
+    respuesta = "No tengo evidencia en las políticas para responder esto.";
+    citas = [];
+  } else {
+    const contexto = resultados.map((r) => r.entrada.texto);
+    respuesta = await obtenerProveedor().generarRespuesta(parseo.data.pregunta, contexto);
+    citas = resultados.slice(0, 1).map((r) => ({ documento: r.entrada.documento, seccion: r.entrada.seccion }));
+  }
+
+  res.json({ respuesta, citas, confianza: similitudMaxima });
 });
