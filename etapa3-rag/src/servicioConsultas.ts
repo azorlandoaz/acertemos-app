@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { AppError, HeuristicProvider, type IAProvider } from "etapa2-api";
 import { cargarConfig } from "./config/env.js";
 import { buscar, cargarIndice, type EntradaIndice } from "./busqueda/vectorStore.js";
@@ -37,7 +38,11 @@ function obtenerProveedorPorDefecto(): IAProvider {
 }
 
 function rutaIndice(): string {
-  return path.resolve(process.cwd(), "data/indice_vectorial.json");
+  if (process.env.RUTA_INDICE_VECTORIAL) {
+    return path.resolve(process.env.RUTA_INDICE_VECTORIAL);
+  }
+  const aqui = path.dirname(fileURLToPath(import.meta.url));
+  return path.resolve(aqui, "../data/indice_vectorial.json");
 }
 
 function obtenerIndice(): EntradaIndice[] {
