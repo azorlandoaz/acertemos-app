@@ -17,11 +17,15 @@ export function cargarIndice(ruta: string): EntradaIndice[] {
 }
 
 function similitudCoseno(a: number[], b: number[]): number {
-  const largo = Math.min(a.length, b.length);
+  if (a.length !== b.length) {
+    throw new Error(
+      `similitudCoseno: dimensiones incompatibles (${a.length} vs ${b.length}) - el índice y la consulta deben usar el mismo proveedor de embeddings`
+    );
+  }
   let producto = 0;
   let normaA = 0;
   let normaB = 0;
-  for (let i = 0; i < largo; i++) {
+  for (let i = 0; i < a.length; i++) {
     producto += a[i] * b[i];
     normaA += a[i] * a[i];
     normaB += b[i] * b[i];
