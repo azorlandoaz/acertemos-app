@@ -11,7 +11,8 @@ caracteres por fragmento con 100 de solape para las secciones más largas.
 ## Alternativa elegida
 Índice embebido: archivo JSON local (`etapa3-rag/data/indice_vectorial.json`,
 tipo `EntradaIndice[]` con `{documento, seccion, texto, embedding}`) cargado
-completo en memoria en cada consulta, con similitud coseno calculada en
+completo en memoria una sola vez y cacheado (patrón de singleton perezoso, no
+se relee el archivo en cada consulta), con similitud coseno calculada en
 JavaScript puro (`vectorStore.ts::buscar`). Métrica: coseno, `k=3` resultados
 por consulta, umbral de abstención `0.75` sobre la similitud máxima.
 
