@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import request from "supertest";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { listarEstados } from "../../src/estadoSync.js";
 
 let dirTemporal: string;
 let rutaEstado: string;
@@ -83,5 +84,41 @@ describe("POST /webhook/entrada", () => {
     const { crearApp } = await import("../../src/app.js");
     const res = await request(crearApp()).post("/webhook/entrada").send({ pregunta: "" });
     expect(res.status).toBe(422);
+  });
+
+  it("un evento cuyo pipeline falla queda en estado error y puede reprocesarse al reenviarlo", async () => {
+    const { crearApp } = await import("../../src/app.js");
+    const { ejecutarPipeline } = await import("../../src/pipeline.js");
+    const app = crearApp();
+    const eventoId = "evt-falla";
+
+    vi.mocked(ejecutarPipeline).mockRejectedValueOnce(new Error("fallo simulado"));
+
+    const res = await request(app)
+      .post("/webhook/entrada")
+      .send({ evento_id: eventoId, pregunta: "¿cuál es la política de vacaciones?" });
+
+    expect(res.status).toBe(202);
+    expect(res.body.duplicado).toBe(false);
+
+    await vi.waitFor(
+      () => {
+        const estados = listarEstados(rutaEstado);
+        const registro = estados.find((r) => r.evento_id === eventoId);
+        expect(registro?.estado).toBe("error");
+      },
+      { timeout: 1000 }
+    );
+
+    // El mismo evento_id, ahora con el pipeline exitoso (mock por defecto),
+    // debe volver a procesarse: un evento en estado "error" no bloquea
+    // reintentos futuros.
+    const reenvio = await request(app)
+      .post("/webhook/entrada")
+      .send({ evento_id: eventoId, pregunta: "¿cuál es la política de vacaciones?" });
+
+    expect(reenvio.status).toBe(202);
+    expect(reenvio.body.duplicado).toBe(false);
+    expect(ejecutarPipeline).toHaveBeenCalledTimes(2);
   });
 });

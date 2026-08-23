@@ -1,7 +1,7 @@
 import path from "node:path";
 import { Router } from "express";
 import { z } from "zod";
-import { ClasificadorService, HeuristicProvider, HttpChatProvider } from "etapa2-api";
+import { AppError, ClasificadorService, HeuristicProvider, HttpChatProvider } from "etapa2-api";
 import { cargarConfig } from "../config/env.js";
 import { marcarEstado, yaFueVisto } from "../estadoSync.js";
 import { ejecutarPipeline } from "../pipeline.js";
@@ -41,9 +41,7 @@ webhookRouter.post("/entrada", async (req, res, next) => {
   try {
     const parseo = EventoEntrada.safeParse(req.body);
     if (!parseo.success) {
-      return res.status(422).json({
-        error: { code: "ENTRADA_INVALIDA", message: "Evento inválido", details: parseo.error.flatten() },
-      });
+      return next(new AppError(422, "ENTRADA_INVALIDA", "Evento inválido", parseo.error.flatten()));
     }
 
     const ruta = rutaEstadoSync();
@@ -55,9 +53,20 @@ webhookRouter.post("/entrada", async (req, res, next) => {
     res.status(202).json({ recibido: true, duplicado: false });
 
     const config = cargarConfig();
-    const resultado = await ejecutarPipeline(parseo.data, obtenerClasificador(), config.umbralEscalamiento);
-    marcarEstado(parseo.data.evento_id, "enviado", ruta);
-    void resultado;
+    ejecutarPipeline(parseo.data, obtenerClasificador(), config.umbralEscalamiento)
+      .then(() => {
+        marcarEstado(parseo.data.evento_id, "enviado", ruta);
+      })
+      .catch((err) => {
+        marcarEstado(parseo.data.evento_id, "error", ruta);
+        console.error(
+          JSON.stringify({
+            evento: "pipeline_error",
+            evento_id: parseo.data.evento_id,
+            mensaje: err instanceof Error ? err.message : String(err),
+          })
+        );
+      });
   } catch (err) {
     next(err);
   }

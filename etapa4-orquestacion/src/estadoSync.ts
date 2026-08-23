@@ -19,8 +19,14 @@ function guardar(ruta: string, registros: Record<string, RegistroSync>): void {
   writeFileSync(ruta, JSON.stringify(registros, null, 2), "utf-8");
 }
 
+/** Un evento se considera "ya visto" si tiene un registro que NO está en
+ * estado error - un evento que falló puede reenviarse y reprocesarse
+ * (evita que un fallo transitorio del pipeline bloquee el evento para
+ * siempre). */
 export function yaFueVisto(eventoId: string, ruta: string): boolean {
-  return eventoId in cargar(ruta);
+  const registros = cargar(ruta);
+  const registro = registros[eventoId];
+  return registro !== undefined && registro.estado !== "error";
 }
 
 /** Registra o actualiza el estado de sincronización de un evento. Un mismo
