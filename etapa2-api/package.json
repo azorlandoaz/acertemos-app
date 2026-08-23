@@ -1,8 +1,8 @@
 {
   "name": "etapa2-api",
   "version": "1.0.0",
-  "main": "dist/ia/index.js",
-  "types": "dist/ia/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
