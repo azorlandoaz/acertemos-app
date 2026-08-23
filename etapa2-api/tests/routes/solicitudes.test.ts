@@ -70,3 +70,34 @@ describe("GET /solicitudes", () => {
     expect(res.body).toEqual([]);
   });
 });
+
+describe("matriz de roles en los endpoints reales", () => {
+  it("solicitante puede crear (POST /solicitudes)", async () => {
+    const res = await request(crearApp())
+      .post("/solicitudes")
+      .set("X-Role", "solicitante")
+      .send({ asunto: "Prueba de rol", descripcion: "", area: "Compras", solicitante: "a@x.com" });
+    expect(res.status).toBe(201);
+  });
+
+  it("solicitante puede consultar por id (GET /solicitudes/:id)", async () => {
+    const app = crearApp();
+    const creada = await request(app)
+      .post("/solicitudes")
+      .set("X-Role", "administrador")
+      .send({ asunto: "Prueba de rol", descripcion: "", area: "Compras", solicitante: "a@x.com" });
+
+    const res = await request(app)
+      .get(`/solicitudes/${creada.body.id}`)
+      .set("X-Role", "solicitante");
+    expect(res.status).toBe(200);
+  });
+
+  it("solicitante NO puede listar (GET /solicitudes) - 403", async () => {
+    const res = await request(crearApp())
+      .get("/solicitudes")
+      .set("X-Role", "solicitante");
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe("ROL_NO_AUTORIZADO");
+  });
+});
