@@ -110,7 +110,26 @@ Para demostrar recuperación semántica real: configurar
 
 ## Evidencia de CI
 
-Ver Actions del repositorio, commits `[ROTO A PROPOSITO]` y el fix
-inmediato siguiente en el historial de la rama `etapa3-rag`:
-- Corrida roja: <completar con el enlace tras `git push`>
-- Corrida verde: <completar con el enlace tras `git push`>
+Evidencia a nivel de historial de commits (spec, Tarea 9): commit
+[`21f0521`](https://github.com/azorlandoaz/acertemos-app/commit/21f0521)
+introduce a propósito una aserción rota en `tests/metricas.test.ts`
+(`[ROTO A PROPOSITO]`, falla localmente), seguido del commit
+[`830859f`](https://github.com/azorlandoaz/acertemos-app/commit/830859f)
+que la corrige (pasa localmente) — diff neto vacío entre ambos, verificado
+en la revisión de tarea correspondiente.
+
+**Limitación real descubierta al publicar la rama (PR
+[#3](https://github.com/azorlandoaz/acertemos-app/pull/3)):** el job
+`etapa3-rag` de `.github/workflows/ci.yml` depende de `needs:
+etapa2-api`, y el job `etapa2-api` actualmente **falla en GitHub Actions**
+por 6 tests preexistentes en `etapa2-api/tests/routes/solicitudes.test.ts`
+— confirmados como preexistentes (no una regresión de Etapa 3) durante la
+revisión de la Tarea 7, comparando el commit base `f8249d0` contra HEAD.
+Como consecuencia, el job `etapa3-rag` nunca llega a ejecutarse en Actions
+(queda "skipped"), por lo que no hay todavía una corrida verde de Actions
+específica para `etapa3-rag` que enlazar aquí — sólo la corrida roja del
+job bloqueante:
+- Corrida roja (job `etapa2-api`, bloquea `etapa3-rag`): https://github.com/azorlandoaz/acertemos-app/actions/runs/32645315759
+- Corrida verde de `etapa3-rag`: pendiente de que se corrija el bug de
+  `etapa2-api` (rama `etapa2-api`, PR #2, no mergeada todavía) — la
+  suite de `etapa3-rag` en sí pasa 25/25 localmente y de forma aislada.
