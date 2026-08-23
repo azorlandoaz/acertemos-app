@@ -22,6 +22,9 @@ describe("cargarConfig", () => {
   });
 
   it("lanza un error claro si falta AI_PROVIDER_API_KEY", () => {
+    process.env.SERVICIO_MOCK_URL = "http://localhost:8080";
+    process.env.SERVICIO_MOCK_TOKEN = "t";
+    process.env.AI_PROVIDER_BASE_URL = "http://localhost:11434/v1";
     delete process.env.AI_PROVIDER_API_KEY;
     expect(() => cargarConfig()).toThrow("AI_PROVIDER_API_KEY");
   });
