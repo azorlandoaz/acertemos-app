@@ -15,7 +15,7 @@ _Pendiente de declarar en el formulario de inicio._
 
 | Etapa | Nivel | Estado |
 |---|---|---|
-| 1 — Fundamentos | Desarrollador IA Junior I | Pendiente |
+| 1 — Fundamentos | Desarrollador IA Junior I | Completa — ver `etapa1-fundamentos/` |
 | 2 — Autonomía e integración | Desarrollador IA Junior II | Pendiente |
 | 3 — Complejidad y calidad | Desarrollador IA Junior III | Pendiente |
 | 4 — Arquitectura y orquestación | Ingeniero IA Middle I | Pendiente |
