@@ -38,4 +38,12 @@ describe("ClasificadorService", () => {
     expect(r.categoria).toBe("Sin clasificar");
     expect(principal.clasificar).toHaveBeenCalledTimes(2);
   });
+
+  it("resuelve con un resultado por defecto si tanto el principal como el respaldo fallan, sin lanzar excepcion", async () => {
+    const principal = proveedorQueFalla();
+    const respaldo = proveedorQueFalla();
+    const servicio = new ClasificadorService(principal, respaldo, 1000, 1);
+
+    await expect(servicio.clasificar("texto")).resolves.toEqual({ categoria: "Sin clasificar", confianza: 0 });
+  });
 });

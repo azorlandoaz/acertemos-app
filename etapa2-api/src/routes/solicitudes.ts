@@ -16,37 +16,48 @@ const EntradaSolicitud = z.object({
   solicitante: z.string().email("El solicitante debe ser un correo válido"),
 });
 
-const config = cargarConfig();
-const clasificador = new ClasificadorService(
-  new HttpChatProvider({
-    baseUrl: config.aiProviderBaseUrl,
-    apiKey: config.aiProviderApiKey,
-    modelo: config.aiProviderModel,
-    timeoutMs: config.aiTimeoutMs,
-  }),
-  new HeuristicProvider(),
-  config.aiTimeoutMs,
-  config.aiMaxReintentos
-);
+let clasificadorSingleton: ClasificadorService | null = null;
 const UMBRAL_ESCALAMIENTO = 0.4;
 
-solicitudesRouter.post("/", async (req, res, next) => {
-  const parseo = EntradaSolicitud.safeParse(req.body);
-  if (!parseo.success) {
-    return next(
-      new AppError(422, "ENTRADA_INVALIDA", "Cuerpo de la solicitud inválido", parseo.error.flatten())
+function obtenerClasificador(): ClasificadorService {
+  if (!clasificadorSingleton) {
+    const config = cargarConfig();
+    clasificadorSingleton = new ClasificadorService(
+      new HttpChatProvider({
+        baseUrl: config.aiProviderBaseUrl,
+        apiKey: config.aiProviderApiKey,
+        modelo: config.aiProviderModel,
+        timeoutMs: config.aiTimeoutMs,
+      }),
+      new HeuristicProvider(),
+      config.aiTimeoutMs,
+      config.aiMaxReintentos
     );
   }
-  const solicitud = crear(parseo.data);
-  const clasificacion = await clasificador.clasificar(`${solicitud.asunto} ${solicitud.descripcion}`);
-  const actualizada = actualizarClasificacion(
-    solicitud.id,
-    clasificacion.categoria,
-    clasificacion.confianza >= UMBRAL_ESCALAMIENTO ? "Media" : "Alta",
-    clasificacion.confianza,
-    UMBRAL_ESCALAMIENTO
-  );
-  res.status(201).json(actualizada);
+  return clasificadorSingleton;
+}
+
+solicitudesRouter.post("/", async (req, res, next) => {
+  try {
+    const parseo = EntradaSolicitud.safeParse(req.body);
+    if (!parseo.success) {
+      return next(
+        new AppError(422, "ENTRADA_INVALIDA", "Cuerpo de la solicitud inválido", parseo.error.flatten())
+      );
+    }
+    const solicitud = crear(parseo.data);
+    const clasificacion = await obtenerClasificador().clasificar(`${solicitud.asunto} ${solicitud.descripcion}`);
+    const actualizada = actualizarClasificacion(
+      solicitud.id,
+      clasificacion.categoria,
+      clasificacion.confianza >= UMBRAL_ESCALAMIENTO ? "Media" : "Alta",
+      clasificacion.confianza,
+      UMBRAL_ESCALAMIENTO
+    );
+    res.status(201).json(actualizada);
+  } catch (err) {
+    next(err);
+  }
 });
 
 solicitudesRouter.get("/:id", (req, res, next) => {

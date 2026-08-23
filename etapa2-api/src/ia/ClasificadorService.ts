@@ -30,6 +30,10 @@ export class ClasificadorService {
         await new Promise((r) => setTimeout(r, 2 ** intento * 50));
       }
     }
-    return this.respaldo.clasificar(texto);
+    try {
+      return await this.respaldo.clasificar(texto);
+    } catch {
+      return { categoria: "Sin clasificar", confianza: 0 };
+    }
   }
 }
