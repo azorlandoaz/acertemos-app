@@ -85,7 +85,9 @@ def contar_reaperturas(tickets):
     """Cuenta cuántos tickets fueron reabiertos al menos una vez."""
     total = 0
     for t in tickets:
-        if t.get("estado") == "reabierto":
+        # Causa raíz (S3): comparación sensible a mayúsculas; el dato
+        # real trae "REABIERTO" en mayúsculas.
+        if (t.get("estado") or "").strip().lower() == "reabierto":
             total += 1
     return total
 

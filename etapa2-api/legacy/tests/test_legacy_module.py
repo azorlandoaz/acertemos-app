@@ -26,3 +26,12 @@ def test_s2_llamadas_sucesivas_no_comparten_conteos():
     segunda = resumir_por_area([{"area": "Calidad"}])
     assert primera == {"Compras": 1}
     assert segunda == {"Calidad": 1}
+
+
+def test_s3_cuenta_reabierto_en_mayusculas():
+    """Causa raíz: contar_reaperturas comparaba estado == "reabierto" en
+    minúscula exacta, pero el dato real trae "REABIERTO" (verificado en
+    tickets_historicos.csv, fila TK-00183)."""
+    from legacy_module import contar_reaperturas
+    tickets = [{"estado": "REABIERTO"}, {"estado": "Abierto"}]
+    assert contar_reaperturas(tickets) == 1
