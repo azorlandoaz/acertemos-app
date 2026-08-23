@@ -1,7 +1,25 @@
 import request from "supertest";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { crearApp } from "../../src/app.js";
 import { _reiniciar } from "../../src/store/solicitudesStore.js";
+
+beforeAll(() => {
+  // Estos tests ejercitan la ruta HTTP real, que construye el
+  // ClasificadorService de forma perezosa (obtenerClasificador()) al
+  // primer POST. Sin un .env presente (checkout nuevo, CI) cargarConfig()
+  // lanza "Falta la variable de entorno requerida" antes de que el
+  // fallback a HeuristicProvider de ClasificadorService tenga oportunidad
+  // de actuar - un fallo de configuración, no un fallo de red, que el
+  // fallback no puede cubrir. Se fijan valores dummy (nunca sobrescriben
+  // un .env real ya cargado) para que el proveedor real falle por red
+  // (ECONNREFUSED en http://localhost:11434, nada escuchando ahí) y el
+  // fallback a HeuristicProvider sí se active - exactamente el camino que
+  // estos tests ya esperaban (aceptan cualquier categoría de la lista).
+  process.env.SERVICIO_MOCK_URL ??= "http://localhost:8080";
+  process.env.SERVICIO_MOCK_TOKEN ??= "test-token";
+  process.env.AI_PROVIDER_BASE_URL ??= "http://localhost:11434/v1";
+  process.env.AI_PROVIDER_API_KEY ??= "test-key";
+});
 
 beforeEach(() => {
   _reiniciar();
