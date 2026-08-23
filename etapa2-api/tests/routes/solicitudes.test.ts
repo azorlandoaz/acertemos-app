@@ -11,6 +11,7 @@ describe("POST /solicitudes", () => {
   it("crea una solicitud y devuelve 201 con el cuerpo creado", async () => {
     const res = await request(crearApp())
       .post("/solicitudes")
+      .set("X-Role", "administrador")
       .send({ asunto: "El portátil no enciende", descripcion: "Desde ayer", area: "Operaciones", solicitante: "ana@lafortuna.com.co" });
 
     expect(res.status).toBe(201);
@@ -23,6 +24,7 @@ describe("POST /solicitudes", () => {
   it("devuelve 422 si falta un campo requerido", async () => {
     const res = await request(crearApp())
       .post("/solicitudes")
+      .set("X-Role", "administrador")
       .send({ descripcion: "sin asunto", area: "Operaciones", solicitante: "ana@lafortuna.com.co" });
 
     expect(res.status).toBe(422);
@@ -35,15 +37,16 @@ describe("GET /solicitudes/:id", () => {
     const app = crearApp();
     const creada = await request(app)
       .post("/solicitudes")
+      .set("X-Role", "administrador")
       .send({ asunto: "Cuántos días de vacaciones tengo", descripcion: "", area: "Talento Humano", solicitante: "ana@lafortuna.com.co" });
 
-    const res = await request(app).get(`/solicitudes/${creada.body.id}`);
+    const res = await request(app).get(`/solicitudes/${creada.body.id}`).set("X-Role", "administrador");
     expect(res.status).toBe(200);
     expect(res.body.id).toBe(creada.body.id);
   });
 
   it("devuelve 404 con la forma uniforme si no existe", async () => {
-    const res = await request(crearApp()).get("/solicitudes/no-existe");
+    const res = await request(crearApp()).get("/solicitudes/no-existe").set("X-Role", "administrador");
     expect(res.status).toBe(404);
     expect(res.body).toEqual({ error: { code: "NO_ENCONTRADA", message: "Solicitud no encontrada" } });
   });
@@ -52,17 +55,17 @@ describe("GET /solicitudes/:id", () => {
 describe("GET /solicitudes", () => {
   it("lista con filtro de area", async () => {
     const app = crearApp();
-    await request(app).post("/solicitudes").send({ asunto: "Uno", descripcion: "", area: "Compras", solicitante: "a@x.com" });
-    await request(app).post("/solicitudes").send({ asunto: "Dos", descripcion: "", area: "Calidad", solicitante: "b@x.com" });
+    await request(app).post("/solicitudes").set("X-Role", "administrador").send({ asunto: "Uno", descripcion: "", area: "Compras", solicitante: "a@x.com" });
+    await request(app).post("/solicitudes").set("X-Role", "administrador").send({ asunto: "Dos", descripcion: "", area: "Calidad", solicitante: "b@x.com" });
 
-    const res = await request(app).get("/solicitudes?area=Compras");
+    const res = await request(app).get("/solicitudes?area=Compras").set("X-Role", "administrador");
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(1);
     expect(res.body[0].area).toBe("Compras");
   });
 
   it("devuelve lista vacia (200, no error) si no hay resultados", async () => {
-    const res = await request(crearApp()).get("/solicitudes?area=NoExiste");
+    const res = await request(crearApp()).get("/solicitudes?area=NoExiste").set("X-Role", "administrador");
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
   });

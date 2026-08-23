@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { AppError } from "../errors.js";
+import { requiereRol } from "../middleware/authRole.js";
 import { crear, listar, obtenerPorId, actualizarClasificacion } from "../store/solicitudesStore.js";
 import { ClasificadorService } from "../ia/ClasificadorService.js";
 import { HeuristicProvider } from "../ia/HeuristicProvider.js";
@@ -37,7 +38,7 @@ function obtenerClasificador(): ClasificadorService {
   return clasificadorSingleton;
 }
 
-solicitudesRouter.post("/", async (req, res, next) => {
+solicitudesRouter.post("/", requiereRol("solicitante", "responsable_area", "administrador"), async (req, res, next) => {
   try {
     const parseo = EntradaSolicitud.safeParse(req.body);
     if (!parseo.success) {
@@ -60,7 +61,7 @@ solicitudesRouter.post("/", async (req, res, next) => {
   }
 });
 
-solicitudesRouter.get("/:id", (req, res, next) => {
+solicitudesRouter.get("/:id", requiereRol("solicitante", "responsable_area", "administrador"), (req, res, next) => {
   const solicitud = obtenerPorId(req.params.id);
   if (!solicitud) {
     return next(new AppError(404, "NO_ENCONTRADA", "Solicitud no encontrada"));
@@ -68,7 +69,7 @@ solicitudesRouter.get("/:id", (req, res, next) => {
   res.json(solicitud);
 });
 
-solicitudesRouter.get("/", (req, res) => {
+solicitudesRouter.get("/", requiereRol("responsable_area", "administrador"), (req, res) => {
   const { area, estado, categoria } = req.query;
   res.json(
     listar({
