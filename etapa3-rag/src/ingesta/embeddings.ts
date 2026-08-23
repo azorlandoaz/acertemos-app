@@ -4,7 +4,7 @@ import path from "node:path";
 import type { IAProvider } from "etapa2-api";
 import type { Fragmento } from "./chunker.js";
 
-function claveDe(f: Fragmento): string {
+export function claveDe(f: Fragmento): string {
   const hash = createHash("sha256").update(f.texto).digest("hex").slice(0, 16);
   return `${f.documento}::${f.seccion}::${hash}`;
 }

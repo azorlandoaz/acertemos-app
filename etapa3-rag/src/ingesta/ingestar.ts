@@ -5,7 +5,7 @@ import type { IAProvider } from "etapa2-api";
 import { HeuristicProvider } from "etapa2-api";
 import { guardarIndice, type EntradaIndice } from "../busqueda/vectorStore.js";
 import { fragmentarPorSeccion } from "./chunker.js";
-import { generarEmbeddingsConCache } from "./embeddings.js";
+import { claveDe, generarEmbeddingsConCache } from "./embeddings.js";
 import { extraerTexto } from "./pdfParser.js";
 
 /** Ingesta todos los PDF de un directorio: extrae, fragmenta, genera
@@ -26,14 +26,10 @@ export async function ingestarDirectorio(
   }
 
   const embeddings = await generarEmbeddingsConCache(todosFragmentos, proveedor, rutaCache);
-  const claveDe = (documento: string, seccion: string, texto: string) => {
-    // misma lógica de clave que embeddings.ts para poder recuperar el vector
-    return [...embeddings.keys()].find((k) => k.startsWith(`${documento}::${seccion}::`));
-  };
 
   const entradas: EntradaIndice[] = todosFragmentos.map((f) => {
-    const clave = claveDe(f.documento, f.seccion, f.texto);
-    const embedding = clave ? embeddings.get(clave)! : [];
+    const clave = claveDe(f);
+    const embedding = embeddings.get(clave) ?? [];
     return { ...f, embedding };
   });
 
