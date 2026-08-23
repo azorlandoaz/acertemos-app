@@ -118,18 +118,22 @@ introduce a propósito una aserción rota en `tests/metricas.test.ts`
 que la corrige (pasa localmente) — diff neto vacío entre ambos, verificado
 en la revisión de tarea correspondiente.
 
-**Limitación real descubierta al publicar la rama (PR
-[#3](https://github.com/azorlandoaz/acertemos-app/pull/3)):** el job
-`etapa3-rag` de `.github/workflows/ci.yml` depende de `needs:
-etapa2-api`, y el job `etapa2-api` actualmente **falla en GitHub Actions**
-por 6 tests preexistentes en `etapa2-api/tests/routes/solicitudes.test.ts`
-— confirmados como preexistentes (no una regresión de Etapa 3) durante la
-revisión de la Tarea 7, comparando el commit base `f8249d0` contra HEAD.
-Como consecuencia, el job `etapa3-rag` nunca llega a ejecutarse en Actions
-(queda "skipped"), por lo que no hay todavía una corrida verde de Actions
-específica para `etapa3-rag` que enlazar aquí — sólo la corrida roja del
-job bloqueante:
-- Corrida roja (job `etapa2-api`, bloquea `etapa3-rag`): https://github.com/azorlandoaz/acertemos-app/actions/runs/32645315759
-- Corrida verde de `etapa3-rag`: pendiente de que se corrija el bug de
-  `etapa2-api` (rama `etapa2-api`, PR #2, no mergeada todavía) — la
-  suite de `etapa3-rag` en sí pasa 25/25 localmente y de forma aislada.
+**Historial del bloqueo y su resolución (PR
+[#3](https://github.com/azorlandoaz/acertemos-app/pull/3)):** al publicar
+la rama, el job `etapa3-rag` (que depende de `needs: etapa2-api`) nunca
+llegó a ejecutarse porque `etapa2-api` fallaba en Actions por 6 tests
+preexistentes en `etapa2-api/tests/routes/solicitudes.test.ts` y
+`tests/config/env.test.ts` — dependían de un `.env` ambiental para que
+`cargarConfig()` no lanzara, inexistente en un checkout nuevo/CI. Se
+corrigió en la rama `etapa2-api` (commit
+[`cb4cf0a`](https://github.com/azorlandoaz/acertemos-app/commit/cb4cf0a),
+tests herméticos con variables dummy en `beforeAll`) y se fusionó a
+`etapa3-rag`. Al desbloquearse, apareció un segundo caso del mismo patrón
+en `tests/routes/consultas.test.ts` (`cargarConfig()` seguía exigiendo
+`AI_PROVIDER_BASE_URL`/`AI_PROVIDER_API_KEY` aunque el endpoint ya no los
+usa con `HeuristicProvider` por defecto), corregido igual (commit
+[`2bb40b2`](https://github.com/azorlandoaz/acertemos-app/commit/2bb40b2)).
+
+- Corrida roja original (job `etapa2-api` bloqueando `etapa3-rag`): https://github.com/azorlandoaz/acertemos-app/actions/runs/32645315759
+- **Corrida verde, los 3 jobs pasando** (`etapa1-fundamentos`,
+  `etapa2-api`, `etapa3-rag`): https://github.com/azorlandoaz/acertemos-app/actions/runs/32646619594
