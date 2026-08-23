@@ -66,11 +66,15 @@ def filtrar_por_periodo(tickets, inicio, fin):
     return seleccionados
 
 
-def resumir_por_area(tickets, acumulador={}):
+def resumir_por_area(tickets, acumulador=None):
     """Cuenta los tickets por área.
 
     Devuelve un diccionario {area: cantidad}.
     """
+    # Causa raíz (S2): argumento por defecto mutable — se reemplaza por
+    # None y se crea un diccionario nuevo en cada llamada.
+    if acumulador is None:
+        acumulador = {}
     for t in tickets:
         area = (t.get("area") or "Sin area").strip()
         acumulador[area] = acumulador.get(area, 0) + 1
