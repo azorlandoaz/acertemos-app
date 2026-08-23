@@ -23,15 +23,26 @@ export async function enviarSolicitud(
   opciones: OpcionesCliente
 ): Promise<{ id: string; estado: string }> {
   for (let intento = 1; intento <= opciones.maxReintentos; intento++) {
-    const respuesta = await fetch(`${opciones.baseUrl}/solicitudes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${opciones.token}`,
-        "Idempotency-Key": claveIdempotencia,
-      },
-      body: JSON.stringify(datos),
-    });
+    let respuesta: Response;
+    try {
+      respuesta = await fetch(`${opciones.baseUrl}/solicitudes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${opciones.token}`,
+          "Idempotency-Key": claveIdempotencia,
+        },
+        body: JSON.stringify(datos),
+      });
+    } catch (err) {
+      if (intento === opciones.maxReintentos) {
+        throw new Error(
+          `servicio_mock no respondió (fallo de red) tras ${opciones.maxReintentos} intentos: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2 ** intento * 200));
+      continue;
+    }
 
     if (respuesta.status === 201) {
       return respuesta.json();

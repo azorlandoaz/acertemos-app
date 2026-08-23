@@ -28,4 +28,15 @@ describe("enviarSolicitud (contra servicio_mock real)", () => {
     const segunda = await enviarSolicitud(DATOS, clave, OPCIONES);
     expect(segunda.id).toBe(primera.id);
   }, 20000);
+
+  it("reintenta ante fallo de red y eventualmente lanza tras agotar los reintentos", async () => {
+    const opcionesInalcanzables = {
+      baseUrl: "http://127.0.0.1:9",
+      token: "demo-token-prueba-2026",
+      maxReintentos: 2,
+    };
+    await expect(enviarSolicitud(DATOS, randomUUID(), opcionesInalcanzables)).rejects.toThrow(
+      /servicio_mock no respondió \(fallo de red\)/
+    );
+  }, 10000);
 });
