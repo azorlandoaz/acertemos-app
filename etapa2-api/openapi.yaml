@@ -1,0 +1,42 @@
+openapi: 3.0.3
+info:
+  title: API de Mesa de Ayuda — Etapa 2
+  version: 1.0.0
+  description: Crear, consultar y listar solicitudes, con clasificación por IA.
+paths:
+  /solicitudes:
+    post:
+      summary: Crea una solicitud
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [asunto, area, solicitante]
+              properties:
+                asunto: { type: string, minLength: 3 }
+                descripcion: { type: string }
+                area: { type: string, minLength: 2 }
+                solicitante: { type: string, format: email }
+      responses:
+        '201': { description: Creada }
+        '422': { description: Entrada inválida }
+        '403': { description: Rol no autorizado }
+    get:
+      summary: Lista solicitudes con filtros
+      parameters:
+        - { in: query, name: area, schema: { type: string } }
+        - { in: query, name: estado, schema: { type: string } }
+        - { in: query, name: categoria, schema: { type: string } }
+      responses:
+        '200': { description: Listado }
+        '403': { description: Rol no autorizado }
+  /solicitudes/{id}:
+    get:
+      summary: Consulta una solicitud por id
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Encontrada }
+        '404': { description: No existe }
