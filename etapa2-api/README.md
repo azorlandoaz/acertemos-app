@@ -49,3 +49,39 @@ para evitar post-procesamiento frágil de texto libre. Ver
 ## Qué quedó fuera
 
 - Pantalla Angular (opcional con puntaje, no incluida en este plan).
+
+## Docker
+
+```bash
+cd etapa2-api/docker
+cp .env.example .env
+docker compose up -d --build
+docker compose ps   # mariadb debe quedar "healthy"
+curl http://localhost:3000/health
+```
+
+## Ejemplo de log
+
+```json
+{"requestId":"3f2a1c9e-...","metodo":"POST","ruta":"/solicitudes","status":201,"duracionMs":42}
+```
+
+## Ejemplo de prompt y salida
+
+Prompt (ver `src/ia/prompts.ts`, resumido):
+```
+Clasifica la siguiente solicitud interna en una de estas categorías: Vacaciones, Hardware, Software, ...
+Responde ÚNICAMENTE con JSON válido de la forma {"categoria": "...", "confianza": 0.0-1.0}, sin texto adicional.
+Texto a clasificar: "El portátil no enciende desde ayer"
+```
+Salida esperada: `{"categoria": "Hardware", "confianza": 0.85}`
+
+## Pruebas del módulo legacy (Python)
+
+```bash
+cd etapa2-api/legacy
+python -m venv .venv
+.venv/Scripts/activate   # Windows; Linux/Mac: source .venv/bin/activate
+pip install -r requirements.txt
+python -m pytest -v
+```

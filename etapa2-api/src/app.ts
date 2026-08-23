@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yaml";
-import { errorHandler } from "./errors.js";
+import { AppError, errorHandler } from "./errors.js";
 import { requestLogger } from "./logger.js";
 import { solicitudesRouter } from "./routes/solicitudes.js";
 
@@ -22,6 +22,9 @@ export function crearApp(): express.Express {
   });
   app.use("/solicitudes", solicitudesRouter);
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapiDoc));
+  app.use((_req, _res, next) => {
+    next(new AppError(404, "RUTA_NO_ENCONTRADA", "Recurso no encontrado"));
+  });
   app.use(errorHandler);
   return app;
 }

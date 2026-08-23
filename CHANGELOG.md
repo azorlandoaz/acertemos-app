@@ -17,3 +17,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Spec de Etapa 1 ampliado con dockerización de la base de datos (MariaDB vía Docker Compose montando `esquema.sql`) y pruebas automatizadas que verifican tablas, columnas y disponibilidad del servicio.
 - Spec de Etapa 2 ampliado con dockerización de los 3 servicios (API, MariaDB, `servicio_mock`), documentación servida como Swagger UI interactivo en `/docs`, y un nuevo archivo `docs/roles-y-contratos.md` con matriz de roles/permisos y contrato por endpoint, respaldado por un middleware de autorización ligero por header `X-Role`.
+
+### Fixed
+
+- Correcciones de la revisión final de la rama Etapa 2: forma de error uniforme también para rutas no encontradas (404) y JSON malformado (400, sin filtrar el mensaje interno de `body-parser`); log de request ahora registra la ruta correcta (`req.originalUrl` capturado al entrar, no `req.path` al finalizar); variables de entorno numéricas (`PORT`, `AI_TIMEOUT_MS`, `AI_MAX_REINTENTOS`) validadas en vez de degradar silenciosamente a `NaN`; salida del modelo de IA validada con `zod` antes de usarla; cobertura de pruebas agregada para el camino de timeout del proveedor de IA y el umbral de escalamiento por confianza baja; `README.md` ampliado con evidencia de Docker, ejemplo de log y de prompt/salida, e instrucciones de la suite `pytest` del legacy; `openapi.yaml` documenta el header `X-Role` y la respuesta 403 en los 3 endpoints; `GET /solicitudes` soporta paginación simple (`limite`/`desplazamiento`).

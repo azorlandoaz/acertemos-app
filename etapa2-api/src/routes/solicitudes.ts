@@ -70,12 +70,14 @@ solicitudesRouter.get("/:id", requiereRol("solicitante", "responsable_area", "ad
 });
 
 solicitudesRouter.get("/", requiereRol("responsable_area", "administrador"), (req, res) => {
-  const { area, estado, categoria } = req.query;
+  const { area, estado, categoria, limite, desplazamiento } = req.query;
   res.json(
     listar({
       area: typeof area === "string" ? area : undefined,
       estado: typeof estado === "string" ? estado : undefined,
       categoria: typeof categoria === "string" ? categoria : undefined,
+      limite: typeof limite === "string" ? Number(limite) : undefined,
+      desplazamiento: typeof desplazamiento === "string" ? Number(desplazamiento) : undefined,
     })
   );
 });

@@ -34,4 +34,13 @@ describe("cargarConfig", () => {
     const config = cargarConfig();
     expect(config.servicioMockUrl).toBe("http://localhost:8080");
   });
+
+  it("lanza un error claro si AI_TIMEOUT_MS no es numerico", () => {
+    process.env.SERVICIO_MOCK_URL = "http://localhost:8080";
+    process.env.SERVICIO_MOCK_TOKEN = "t";
+    process.env.AI_PROVIDER_BASE_URL = "http://localhost:11434/v1";
+    process.env.AI_PROVIDER_API_KEY = "k";
+    process.env.AI_TIMEOUT_MS = "cinco-mil";
+    expect(() => cargarConfig()).toThrow("AI_TIMEOUT_MS");
+  });
 });

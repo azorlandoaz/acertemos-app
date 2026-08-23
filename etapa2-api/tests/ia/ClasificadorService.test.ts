@@ -46,4 +46,17 @@ describe("ClasificadorService", () => {
 
     await expect(servicio.clasificar("texto")).resolves.toEqual({ categoria: "Sin clasificar", confianza: 0 });
   });
+
+  it("cae al respaldo cuando el principal nunca resuelve (timeout)", async () => {
+    const principal: IAProvider = {
+      clasificar: () => new Promise(() => {}), // nunca resuelve
+      generarRespuesta: vi.fn(),
+      embeber: vi.fn(),
+    };
+    const respaldo = proveedorQueResponde("Sin clasificar", 0.1);
+    const servicio = new ClasificadorService(principal, respaldo, 50, 1);
+
+    const r = await servicio.clasificar("texto");
+    expect(r.categoria).toBe("Sin clasificar");
+  });
 });

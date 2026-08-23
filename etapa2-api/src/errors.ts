@@ -25,6 +25,17 @@ export function errorHandler(
     });
     return;
   }
-  const mensaje = err instanceof Error ? err.message : "Error interno";
-  res.status(500).json({ error: { code: "ERROR_INTERNO", message: mensaje } });
+  const status = typeof (err as { status?: unknown })?.status === "number" ? (err as { status: number }).status : 500;
+  if (status === 400) {
+    res.status(400).json({ error: { code: "JSON_INVALIDO", message: "El cuerpo no es JSON válido" } });
+    return;
+  }
+  console.error(
+    JSON.stringify({
+      nivel: "error",
+      mensaje: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    })
+  );
+  res.status(500).json({ error: { code: "ERROR_INTERNO", message: "Error interno" } });
 }

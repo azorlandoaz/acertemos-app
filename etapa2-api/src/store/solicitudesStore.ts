@@ -59,13 +59,22 @@ export function actualizarClasificacion(
   return s;
 }
 
-export function listar(filtros: { area?: string; estado?: string; categoria?: string }): Solicitud[] {
-  return [...solicitudes.values()].filter((s) => {
+export function listar(filtros: {
+  area?: string;
+  estado?: string;
+  categoria?: string;
+  limite?: number;
+  desplazamiento?: number;
+}): Solicitud[] {
+  const resultado = [...solicitudes.values()].filter((s) => {
     if (filtros.area && s.area.toLowerCase() !== filtros.area.toLowerCase()) return false;
     if (filtros.estado && s.estado.toLowerCase() !== filtros.estado.toLowerCase()) return false;
     if (filtros.categoria && s.categoria?.toLowerCase() !== filtros.categoria.toLowerCase()) return false;
     return true;
   });
+  const desplazamiento = filtros.desplazamiento ?? 0;
+  const limite = filtros.limite ?? resultado.length;
+  return resultado.slice(desplazamiento, desplazamiento + limite);
 }
 
 /** Solo para pruebas: limpia el store entre tests. */

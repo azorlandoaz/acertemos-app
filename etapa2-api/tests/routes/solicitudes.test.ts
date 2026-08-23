@@ -30,6 +30,19 @@ describe("POST /solicitudes", () => {
     expect(res.status).toBe(422);
     expect(res.body.error.code).toBe("ENTRADA_INVALIDA");
   });
+
+  it("escala automaticamente cuando la clasificacion tiene confianza baja", async () => {
+    const res = await request(crearApp())
+      .post("/solicitudes")
+      .set("X-Role", "administrador")
+      .send({
+        asunto: "xyz texto sin señales reconocibles 123",
+        descripcion: "",
+        area: "Otros",
+        solicitante: "a@x.com",
+      });
+    expect(res.body.estado).toBe("Escalado");
+  });
 });
 
 describe("GET /solicitudes/:id", () => {
@@ -68,6 +81,19 @@ describe("GET /solicitudes", () => {
     const res = await request(crearApp()).get("/solicitudes?area=NoExiste").set("X-Role", "administrador");
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
+  });
+
+  it("pagina el listado con limite y desplazamiento", async () => {
+    const app = crearApp();
+    for (const n of [1, 2, 3]) {
+      await request(app)
+        .post("/solicitudes")
+        .set("X-Role", "administrador")
+        .send({ asunto: `Solicitud ${n}`, descripcion: "", area: "Compras", solicitante: "a@x.com" });
+    }
+    const res = await request(app).get("/solicitudes?limite=2").set("X-Role", "administrador");
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(2);
   });
 });
 

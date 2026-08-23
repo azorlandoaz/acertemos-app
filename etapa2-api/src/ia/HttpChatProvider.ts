@@ -1,4 +1,10 @@
+import { z } from "zod";
 import type { IAProvider, ResultadoClasificacion } from "./IAProvider.js";
+
+const ResultadoClasificacionSchema = z.object({
+  categoria: z.string(),
+  confianza: z.number().min(0).max(1),
+});
 
 interface OpcionesHttpChatProvider {
   baseUrl: string;
@@ -45,8 +51,7 @@ export class HttpChatProvider implements IAProvider {
   async clasificar(texto: string): Promise<ResultadoClasificacion> {
     const { promptClasificacion } = await import("./prompts.js");
     const salida = await this.completar(promptClasificacion(texto));
-    const parseado = JSON.parse(salida) as ResultadoClasificacion;
-    return parseado;
+    return ResultadoClasificacionSchema.parse(JSON.parse(salida));
   }
 
   async generarRespuesta(prompt: string, contexto: string[]): Promise<string> {
