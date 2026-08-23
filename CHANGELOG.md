@@ -17,9 +17,3 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Spec de Etapa 1 ampliado con dockerización de la base de datos (MariaDB vía Docker Compose montando `esquema.sql`) y pruebas automatizadas que verifican tablas, columnas y disponibilidad del servicio.
 - Spec de Etapa 2 ampliado con dockerización de los 3 servicios (API, MariaDB, `servicio_mock`), documentación servida como Swagger UI interactivo en `/docs`, y un nuevo archivo `docs/roles-y-contratos.md` con matriz de roles/permisos y contrato por endpoint, respaldado por un middleware de autorización ligero por header `X-Role`.
-
-### Fixed
-
-- **Etapa 2 — Task 2 (S1)**: `filtrar_por_periodo` excluía tickets creados exactamente el primer o el último día del periodo (comparadores estrictos `>` y `<` cambiados a `>=` y `<=`).
-- **Etapa 2 — Task 3 (S2)**: `resumir_por_area` reutilizaba el diccionario acumulador entre llamadas sucesivas (argumento por defecto mutable — reemplazado con `None` y creación de diccionario nuevo en cada llamada).
-- **Etapa 2 — Task 4 (S3)**: `contar_reaperturas` no contaba tickets con estado "REABIERTO" en mayúsculas (normalización con `.strip().lower()`).
