@@ -12,14 +12,24 @@ const EntradaConsulta = z.object({
   pregunta: z.string().min(3, "La pregunta debe tener al menos 3 caracteres").max(500),
 });
 
-const config = cargarConfig();
-const RUTA_INDICE = path.resolve(process.cwd(), "data/indice_vectorial.json");
-const proveedor = new HttpChatProvider({
-  baseUrl: config.aiProviderBaseUrl,
-  apiKey: config.aiProviderApiKey,
-  modelo: config.aiProviderModel,
-  timeoutMs: config.aiTimeoutMs,
-});
+let proveedorSingleton: HttpChatProvider | null = null;
+
+function obtenerProveedor(): HttpChatProvider {
+  if (!proveedorSingleton) {
+    const config = cargarConfig();
+    proveedorSingleton = new HttpChatProvider({
+      baseUrl: config.aiProviderBaseUrl,
+      apiKey: config.aiProviderApiKey,
+      modelo: config.aiProviderModel,
+      timeoutMs: config.aiTimeoutMs,
+    });
+  }
+  return proveedorSingleton;
+}
+
+function rutaIndice(): string {
+  return path.resolve(process.cwd(), "data/indice_vectorial.json");
+}
 
 consultasRouter.post("/", async (req, res, next) => {
   const parseo = EntradaConsulta.safeParse(req.body);
@@ -27,12 +37,12 @@ consultasRouter.post("/", async (req, res, next) => {
     return next(new AppError(422, "ENTRADA_INVALIDA", "Pregunta inválida", parseo.error.flatten()));
   }
 
-  const indice = cargarIndice(RUTA_INDICE);
-  const [embeddingConsulta] = await proveedor.embeber([parseo.data.pregunta]);
+  const indice = cargarIndice(rutaIndice());
+  const [embeddingConsulta] = await obtenerProveedor().embeber([parseo.data.pregunta]);
   const resultados = buscar(indice, embeddingConsulta, 3);
 
   const contexto = resultados.map((r) => r.entrada.texto);
-  const respuesta = await proveedor.generarRespuesta(parseo.data.pregunta, contexto);
+  const respuesta = await obtenerProveedor().generarRespuesta(parseo.data.pregunta, contexto);
   const citas = resultados
     .slice(0, 1)
     .map((r) => ({ documento: r.entrada.documento, seccion: r.entrada.seccion }));
