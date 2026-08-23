@@ -1,0 +1,5 @@
+{
+  "name": "mesa-ayuda-inteligente",
+  "private": true,
+  "workspaces": ["etapa2-api", "etapa3-rag"]
+}
