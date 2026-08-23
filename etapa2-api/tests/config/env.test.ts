@@ -1,7 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { cargarConfig } from "../../src/config/env.js";
 
-const ORIGINAL_ENV = { ...process.env };
+let ORIGINAL_ENV: NodeJS.ProcessEnv;
+
+beforeAll(() => {
+  ORIGINAL_ENV = { ...process.env };
+});
 
 beforeEach(() => {
   process.env = { ...ORIGINAL_ENV };
