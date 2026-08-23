@@ -1,11 +1,36 @@
+import "dotenv/config";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import request from "supertest";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 let dirTemporal: string;
 let rutaEstado: string;
+
+// El import "dotenv/config" de arriba es intencional y va antes que el
+// beforeAll: a diferencia de etapa2-api/tests/routes/solicitudes.test.ts y
+// etapa3-rag/tests/routes/consultas.test.ts (que importan crearApp de forma
+// estática en la cabecera), este archivo importa src/app.js de forma
+// DINAMICA dentro de cada it() (requerido para que vi.mock del pipeline
+// funcione). Eso retrasa la carga real de dotenv hasta dentro del it(), es
+// decir despues de este beforeAll - si no forzamos aqui la carga de
+// dotenv/config, el beforeAll fijaria el dummy primero y el .env real
+// quedaria silenciosamente ignorado cuando dotenv corra despues (dotenv
+// nunca sobrescribe una variable ya presente en process.env). Verificado
+// empiricamente: sin este import, el .env real queda pisado por el dummy.
+beforeAll(() => {
+  // cargarConfig() exige estas variables para construir el
+  // ClasificadorService; sin .env real (checkout nuevo, CI) lanzaría
+  // antes de llegar a la lógica que este test quiere probar. Se fijan
+  // valores dummy sin sobrescribir un .env real si existe (mismo patrón
+  // que etapa2-api/tests/routes/solicitudes.test.ts y
+  // etapa3-rag/tests/routes/consultas.test.ts).
+  process.env.AI_PROVIDER_BASE_URL ??= "http://localhost:11434/v1";
+  process.env.AI_PROVIDER_API_KEY ??= "test-key";
+  process.env.SERVICIO_MOCK_URL ??= "http://localhost:8080";
+  process.env.SERVICIO_MOCK_TOKEN ??= "test-token";
+});
 
 beforeEach(() => {
   dirTemporal = mkdtempSync(path.join(tmpdir(), "webhook-test-"));
