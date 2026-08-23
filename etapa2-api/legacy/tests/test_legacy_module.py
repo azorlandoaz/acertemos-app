@@ -1,6 +1,6 @@
 from datetime import date
 
-from legacy_module import filtrar_por_periodo, resumir_por_area
+from legacy_module import contar_reaperturas, filtrar_por_periodo, resumir_por_area
 
 
 def test_s1_incluye_tickets_creados_el_primer_dia_del_periodo():
@@ -32,6 +32,5 @@ def test_s3_cuenta_reabierto_en_mayusculas():
     """Causa raíz: contar_reaperturas comparaba estado == "reabierto" en
     minúscula exacta, pero el dato real trae "REABIERTO" (verificado en
     tickets_historicos.csv, fila TK-00183)."""
-    from legacy_module import contar_reaperturas
     tickets = [{"estado": "REABIERTO"}, {"estado": "Abierto"}]
     assert contar_reaperturas(tickets) == 1
