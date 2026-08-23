@@ -12,14 +12,15 @@ cp etapa4-orquestacion/.env.example etapa4-orquestacion/.env   # completar crede
 cd etapa4-orquestacion && npm run dev
 ```
 
-Para la demo end-to-end real, hace falta un paso manual adicional: el
-índice vectorial de Etapa 3 se resuelve por `process.cwd()`, que al correr
-el script desde `etapa4-orquestacion/` no coincide con `etapa3-rag/` —
-ver el comentario en `etapa4-orquestacion/src/scripts/demo.ts` para el
-detalle técnico completo.
+Para la demo end-to-end real no hace falta ningún paso manual adicional:
+`responderConsulta()` (Etapa 3) resuelve el índice vectorial de forma
+relativa a la ubicación de su propio módulo, no al directorio de trabajo
+del proceso que lo importa — ver el comentario en
+`etapa3-rag/src/servicioConsultas.ts::rutaIndice()` y en
+`etapa4-orquestacion/src/scripts/demo.ts` para el detalle técnico
+completo. Basta con generar el índice una vez y tener el `.env`:
 ```bash
 npm run ingestar --workspace etapa3-rag   # genera etapa3-rag/data/indice_vectorial.json (una sola vez)
-cp etapa3-rag/data/indice_vectorial.json etapa4-orquestacion/data/indice_vectorial.json
 cp etapa4-orquestacion/.env.example etapa4-orquestacion/.env   # cargarConfig() exige estas variables, aunque HeuristicProvider no las use
 cd etapa4-orquestacion
 npm run demo
@@ -29,25 +30,55 @@ npm run estado
 ## Qué quedó funcionando de verdad
 
 - Pipeline completo (clasificar → RAG → decidir escalar) ejecutado de
-  extremo a extremo con datos reales — ver `docs/evidencia-demo-etapa4.log`
-  para la corrida real registrada. El mecanismo funciona correctamente
-  (ambos casos produjeron una decisión y quedaron trazados en
-  `estado_sync.json`), pero la calidad semántica de la citación RAG
-  hereda la limitación ya documentada en `etapa3-rag/README.md`: sin
-  proveedor de IA real en este entorno, el caso de vacaciones citó
-  `POL-TIC-03_Gestion_de_Accesos.pdf` en vez del documento correcto
-  (`POL-GTH-01_Vacaciones.pdf`) — `HeuristicProvider` no discrimina
-  semánticamente de forma confiable, aunque el mecanismo de citación en
-  sí esté bien implementado.
+  extremo a extremo con datos reales, sin ningún paso manual — ver
+  `docs/evidencia-demo-etapa4.log` para la corrida real registrada tras
+  el fix del índice vectorial (ver Fix 4 de la revisión final de rama).
+  Resultado real de esa corrida:
+  - `demo-1` ("¿Con cuánta anticipación debo pedir mis vacaciones?"):
+    categoría `Vacaciones`, acción `responder`, cita
+    `POL-TIC-03_Gestion_de_Accesos.pdf` sección 4.
+  - `demo-2` ("¿Cuál es la política de horarios de teletrabajo los
+    viernes?"): categoría `Sin clasificar`, acción `escalar`, cita
+    `POL-TIC-03_Gestion_de_Accesos.pdf` sección 1.
+  - El mecanismo funciona correctamente (ambos casos produjeron una
+    decisión y quedaron trazados como `enviado` en `estado_sync.json`,
+    ver `npm run estado`), pero la calidad semántica de la citación RAG
+    hereda la limitación ya documentada en `etapa3-rag/README.md`: sin
+    proveedor de IA real en este entorno, el caso de vacaciones citó el
+    documento equivocado en vez del correcto (`POL-GTH-01_Vacaciones.pdf`)
+    — `HeuristicProvider` no discrimina semánticamente de forma
+    confiable, aunque el mecanismo de citación en sí esté bien
+    implementado.
+  - **Honestidad adicional:** en ambos casos, el campo `respuesta` de la
+    corrida real es literalmente
+    `"El servicio de generación de respuestas no está disponible en este
+    momento."` — el mensaje de respaldo fijo de
+    `HeuristicProvider.generarRespuesta`, no una respuesta generada de
+    verdad. En este entorno de evaluación no hay proveedor de IA real
+    disponible (mismo motivo documentado en `etapa3-rag/README.md`), así
+    que el texto de `respuesta` no debe leerse como evidencia de
+    generación de lenguaje natural — sí lo son la clasificación, la
+    decisión de escalamiento y la citación de documento/sección, que
+    dependen de la heurística y del índice vectorial, no del proveedor de
+    generación de texto.
 - Deduplicación de eventos entrantes por `evento_id`, verificada con test
-  automatizado (mismo evento dos veces → un solo procesamiento).
+  automatizado (mismo evento dos veces → un solo procesamiento). Un
+  evento cuyo pipeline falla se marca `error` (no se queda `pendiente`
+  para siempre) y puede reprocesarse si se reenvía el mismo `evento_id`.
 - Cliente de envío hacia `servicio_mock` con `Idempotency-Key` y
-  reintentos ante 429/500, verificado con tests reales contra el mock
-  corriendo (no mockeado en red).
+  reintentos ante 429/500 y ante fallo de red (ECONNREFUSED, servicio no
+  disponible), verificado con tests reales contra el mock corriendo (no
+  mockeado en red).
 - Registro de estado de sincronización (`pendiente/enviado/confirmado/error`)
   persistido en disco, consultable con `npm run estado`.
 - Tabla `interacciones_ia` de trazabilidad, migración verificada contra un
   MariaDB real (mismo contenedor Docker de Etapa 2).
+- Forma de error uniforme también para rutas no encontradas (404) y
+  errores no capturados dentro de los handlers (`errorHandler`
+  reutilizado de Etapa 2), registro estructurado por request
+  (`requestLogger`) y `GET /metricas` (reutilizando `resumenMetricas` de
+  Etapa 3) — cierra la brecha de observabilidad transversal que tenían
+  Etapa 2 y Etapa 3 y que a esta etapa le faltaba.
 
 ## Qué quedó solo diseñado (documentado, no ejecutado en producción)
 
