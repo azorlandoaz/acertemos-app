@@ -25,4 +25,11 @@ describe("HeuristicProvider", () => {
     const r = await provider.generarRespuesta("hola", []);
     expect(r).toContain("no está disponible");
   });
+
+  it("embeber devuelve un vector por cada texto de entrada", async () => {
+    const vectores = await provider.embeber(["hola", "mundo distinto"]);
+    expect(vectores).toHaveLength(2);
+    expect(vectores[0]).toHaveLength(2);
+    expect(vectores[0]).not.toEqual(vectores[1]);
+  });
 });
