@@ -1,0 +1,18 @@
+.contenedor {
+  max-width: 960px;
+  margin: 2rem auto;
+}
+
+.filtros {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.paginacion {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
