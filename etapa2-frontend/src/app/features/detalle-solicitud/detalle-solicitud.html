@@ -1,0 +1,29 @@
+<div class="contenedor">
+  @if (noEncontrada()) {
+    <h1>Solicitud no encontrada</h1>
+    <a mat-button routerLink="/solicitudes">Volver al listado</a>
+  } @else if (solicitud(); as s) {
+    <h1>{{ s.asunto }}</h1>
+    <dl>
+      <dt>Área</dt>
+      <dd>{{ s.area }}</dd>
+      <dt>Solicitante</dt>
+      <dd>{{ s.solicitante }}</dd>
+      <dt>Descripción</dt>
+      <dd>{{ s.descripcion || '—' }}</dd>
+      <dt>Categoría</dt>
+      <dd>{{ s.categoria ?? 'Sin clasificar todavía' }}</dd>
+      <dt>Prioridad</dt>
+      <dd>{{ s.prioridad ?? '—' }}</dd>
+      <dt>Confianza de clasificación</dt>
+      <dd>{{ s.confianzaClasificacion ?? '—' }}</dd>
+      <dt>Estado</dt>
+      <dd>{{ s.estado }}</dd>
+      <dt>Creada</dt>
+      <dd>{{ s.fechaCreacion }}</dd>
+    </dl>
+    <a mat-button routerLink="/solicitudes/nueva">Nueva solicitud</a>
+  } @else {
+    <p>Cargando...</p>
+  }
+</div>

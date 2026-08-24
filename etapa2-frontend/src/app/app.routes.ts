@@ -19,4 +19,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/listado-solicitudes/listado-solicitudes').then((m) => m.ListadoSolicitudes),
   },
+  {
+    path: 'solicitudes/:id',
+    canActivate: [rolGuard],
+    loadComponent: () => import('./features/detalle-solicitud/detalle-solicitud').then((m) => m.DetalleSolicitud),
+  },
+  { path: '**', redirectTo: 'rol' },
 ];
