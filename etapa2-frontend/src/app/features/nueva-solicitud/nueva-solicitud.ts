@@ -54,8 +54,8 @@ export class NuevaSolicitud {
     if (!(err instanceof HttpErrorResponse) || err.status !== 422) {
       return;
     }
-    const cuerpo = err.error as { error?: ErrorApi };
-    const camposConError = cuerpo.error?.details?.fieldErrors ?? {};
+    const cuerpo = err.error as { error?: ErrorApi } | null;
+    const camposConError = cuerpo?.error?.details?.fieldErrors ?? {};
     for (const [campo, mensajes] of Object.entries(camposConError)) {
       const control = this.formulario.get(campo);
       if (control && mensajes.length > 0) {

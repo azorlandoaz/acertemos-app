@@ -13,7 +13,7 @@ export class SolicitudesApiService {
   }
 
   obtenerPorId(id: string): Observable<Solicitud> {
-    return this.http.get<Solicitud>(`${this.baseUrl}/${id}`);
+    return this.http.get<Solicitud>(`${this.baseUrl}/${encodeURIComponent(id)}`);
   }
 
   listar(filtros: FiltrosListado): Observable<Solicitud[]> {
