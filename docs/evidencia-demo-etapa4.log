@@ -1,0 +1,6 @@
+
+> etapa4-orquestacion@1.0.0 demo
+> tsx src/scripts/demo.ts
+
+{"evento":"demo_pipeline","evento_id":"demo-1","pregunta":"¿Con cuánta anticipación debo pedir mis vacaciones?","categoria":"Vacaciones","accion":"responder","respuesta":"El servicio de generación de respuestas no está disponible en este momento.","citas":[{"documento":"POL-TIC-03_Gestion_de_Accesos.pdf","seccion":"4"}]}
+{"evento":"demo_pipeline","evento_id":"demo-2","pregunta":"¿Cuál es la política de horarios de teletrabajo los viernes?","categoria":"Sin clasificar","accion":"escalar","respuesta":"El servicio de generación de respuestas no está disponible en este momento.","citas":[{"documento":"POL-TIC-03_Gestion_de_Accesos.pdf","seccion":"1"}]}
