@@ -33,4 +33,21 @@ describe('App', () => {
     const boton = fixture.nativeElement.querySelector('button');
     expect(boton?.textContent).toContain('Cambiar rol');
   });
+
+  it('muestra el enlace a Solicitudes para responsable_area pero no para solicitante', () => {
+    const rolService = TestBed.inject(RolService);
+
+    rolService.establecer({ rol: 'solicitante', nombre: 'x@y.com' });
+    let fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    let enlaces: HTMLAnchorElement[] = Array.from(fixture.nativeElement.querySelectorAll('a'));
+    expect(enlaces.some((a) => a.textContent?.includes('Solicitudes'))).toBe(false);
+
+    rolService.limpiar();
+    rolService.establecer({ rol: 'responsable_area', nombre: 'y@z.com' });
+    fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    enlaces = Array.from(fixture.nativeElement.querySelectorAll('a'));
+    expect(enlaces.some((a) => a.textContent?.includes('Solicitudes'))).toBe(true);
+  });
 });

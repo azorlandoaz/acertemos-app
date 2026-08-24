@@ -1,12 +1,12 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RolService } from './core/rol.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MatButtonModule, MatToolbarModule],
+  imports: [RouterOutlet, RouterLink, MatButtonModule, MatToolbarModule],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
