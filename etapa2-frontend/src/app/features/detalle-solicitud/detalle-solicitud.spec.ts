@@ -51,4 +51,13 @@ describe('DetalleSolicitud', () => {
     const instancia = fixture.componentInstance as any;
     expect(instancia.noEncontrada()).toBe(true);
   });
+
+  it('marca errorGenerico (no noEncontrada) si la API devuelve un error que no es 404', () => {
+    const fixture = crearComponente('abc-1');
+    const req = httpMock.expectOne('/api/solicitudes/abc-1');
+    req.flush({ error: { code: 'ERROR_INTERNO', message: 'x' } }, { status: 500, statusText: 'Server Error' });
+    const instancia = fixture.componentInstance as any;
+    expect(instancia.errorGenerico()).toBe(true);
+    expect(instancia.noEncontrada()).toBe(false);
+  });
 });

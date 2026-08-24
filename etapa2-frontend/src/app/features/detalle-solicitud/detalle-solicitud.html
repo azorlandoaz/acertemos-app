@@ -2,6 +2,11 @@
   @if (noEncontrada()) {
     <h1>Solicitud no encontrada</h1>
     <a mat-button routerLink="/solicitudes">Volver al listado</a>
+    <a mat-button routerLink="/solicitudes/nueva">Nueva solicitud</a>
+  } @else if (errorGenerico()) {
+    <h1>No se pudo cargar la solicitud</h1>
+    <p>Hubo un problema consultando el servidor. Intenta de nuevo más tarde.</p>
+    <a mat-button routerLink="/solicitudes">Volver al listado</a>
   } @else if (solicitud(); as s) {
     <h1>{{ s.asunto }}</h1>
     <dl>

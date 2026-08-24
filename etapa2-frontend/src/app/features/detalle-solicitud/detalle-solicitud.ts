@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { SolicitudesApiService } from '../../solicitudes/solicitudes-api.service';
 import type { Solicitud } from '../../solicitudes/solicitud';
@@ -16,6 +17,7 @@ export class DetalleSolicitud {
 
   protected readonly solicitud = signal<Solicitud | null>(null);
   protected readonly noEncontrada = signal(false);
+  protected readonly errorGenerico = signal(false);
 
   constructor() {
     const id = this.ruta.snapshot.paramMap.get('id');
@@ -25,7 +27,13 @@ export class DetalleSolicitud {
     }
     this.api.obtenerPorId(id).subscribe({
       next: (s) => this.solicitud.set(s),
-      error: () => this.noEncontrada.set(true),
+      error: (err: unknown) => {
+        if (err instanceof HttpErrorResponse && err.status === 404) {
+          this.noEncontrada.set(true);
+        } else {
+          this.errorGenerico.set(true);
+        }
+      },
     });
   }
 }
