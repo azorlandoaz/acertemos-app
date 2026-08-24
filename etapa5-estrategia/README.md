@@ -45,6 +45,8 @@ propuesto.
 
 ```bash
 npm install
+npm run build --workspace etapa2-api
+npm run build --workspace etapa3-rag
 npm run ingestar --workspace etapa3-rag   # genera el indice vectorial real, requerido por la suite
 npm test --workspace etapa5-estrategia
 cat etapa5-estrategia/resultados_evaluacion.json   # resultados de la ultima corrida

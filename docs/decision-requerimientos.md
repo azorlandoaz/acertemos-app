@@ -66,8 +66,9 @@ sin cambios en esta etapa.
 
 **Razonamiento:**
 - *Volumen*: 80 consultas/día es bajo — el costo por llamada a un LLM es
-  irrelevante en esta escala (~US$3,24/mes de salida según
-  `docs/control-costo-etapa4.md`).
+  irrelevante en esta escala (~US$0,54/mes de salida, R-02 aislado; el
+  ~US$3,24/mes de `docs/control-costo-etapa4.md` es el total combinado de
+  salida de R-01+R-02).
 - *Estabilidad*: las políticas cambian 1-2 veces al año, pero las PREGUNTAS
   llegan en lenguaje libre y variable — esto es exactamente lo que un
   clasificador de reglas fijas no puede cubrir (no hay un catálogo finito de
@@ -90,21 +91,27 @@ sin cambios en esta etapa.
   mantener reglas sea más costoso y frágil que un RAG con abstención.
   `HeuristicProvider` (el fallback heurístico del sistema) es en la práctica
   una demostración de esta alternativa descartada: sus resultados reales
-  (ver `metricas_previas.md`, precisión de citación objetivo de solo 30%)
-  confirman por qué no es la opción principal para R-02.
+  (29,03% de precisión de citación medida, 9/31 casos; umbral corregido a
+  ≥25% con evidencia — ver la sección "Corrección post-medición real
+  (Tarea 5)" de `etapa5-estrategia/metricas_previas.md`) confirman por qué
+  no es la opción principal para R-02.
 - *Persona humana sin apoyo de IA*: es el estado actual (18% del tiempo del
   equipo, dato de `requerimientos_negocio.md`) — descartada como destino
   final porque no escala y es el costo que la solución busca reducir, pero
   sigue siendo la vía de escalamiento cuando el RAG se abstiene.
 
-**Costo estimado:** ~US$11/mes con un proveedor externo de referencia
-(`docs/control-costo-etapa4.md`), frente al 18% del tiempo del equipo que
-hoy consume responder manualmente.
+**Costo estimado:** ~US$1,7/mes con un proveedor externo de referencia
+(R-02 aislado; el total combinado con R-01 en `docs/control-costo-etapa4.md`
+es ~US$11/mes), frente al 18% del tiempo del equipo que hoy consume
+responder manualmente.
 
 **Riesgo:** una cita incorrecta (documento equivocado) es peor que una
 abstención — mitigado por el umbral de abstención configurable
 (`UMBRAL_ABSTENCION`) y por la suite de evaluación de esta etapa, que mide
-la precisión de citación y de abstención por separado.
+la precisión de citación y de abstención por separado — aunque con el
+proveedor heurístico actual esa mitigación de abstención mide 0% en la
+práctica (ver la corrección de `metricas_previas.md`, Tarea 5); es efectiva
+solo cuando exista un proveedor de IA real con embeddings semánticos.
 
 **Condición de cambio:** si el volumen creciera órdenes de magnitud (miles
 de consultas/día) o si el catálogo de políticas se volviera tan grande que

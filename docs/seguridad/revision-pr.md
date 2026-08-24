@@ -49,7 +49,7 @@ cursor.execute("UPDATE tickets SET categoria = '" + categoria_ia +
 **Riesgo:** siete puntos de concatenación/interpolación directa de strings
 en SQL en la misma función. El más grave es la línea 86-87: `categoria_ia`
 viene de la respuesta de un LLM (`respuesta.json()["choices"][0]["message"]["content"]`,
-línea 82) — **texto no confiable** que se concatena sin sanitizar en un
+línea 84) — **texto no confiable** que se concatena sin sanitizar en un
 `UPDATE`. Un LLM que devuelva una comilla simple, o un prompt-injection en
 el asunto/descripción del ticket que induzca al modelo a devolver
 fragmento SQL, puede romper o manipular la sentencia (este es el punto
@@ -86,7 +86,7 @@ categoria_ia = respuesta.json()["choices"][0]["message"]["content"]
 
 **Riesgo:** sin `timeout`, una llamada colgada bloquea el proceso
 indefinidamente (afecta a un endpoint que además está dentro de una
-transacción de base de datos abierta con `conn.begin()`, línea 20 —
+transacción de base de datos abierta con `conn.begin()`, línea 14 —
 bloqueando también los locks de esa transacción). Sin `try/except`, un
 error de red o un `50x` del proveedor tumba toda la generación del reporte
 mensual, no solo la clasificación de un ticket. El acceso directo a
