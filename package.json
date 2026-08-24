@@ -1,5 +1,5 @@
 {
   "name": "mesa-ayuda-inteligente",
   "private": true,
-  "workspaces": ["etapa2-api", "etapa3-rag"]
+  "workspaces": ["etapa2-api", "etapa3-rag", "etapa4-orquestacion"]
 }
