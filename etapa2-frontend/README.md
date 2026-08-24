@@ -49,3 +49,9 @@ npm test -- --watch=false
   `docs/superpowers/specs/2026-08-23-etapa2-frontend-angular-design.md`.
 - Pipeline de CI propio — es una demo local, no un entregable
   calificado del Anexo A.
+- Filtros del listado reflejados en la URL — se mantienen en el
+  formulario del componente, así que no se puede marcar como favorito
+  ni compartir una vista filtrada, y recargar la página los reinicia.
+- Reintento automático ante errores de red/servidor — se muestra un
+  mensaje, pero no hay botón para reintentar la acción; hay que
+  repetirla manualmente.

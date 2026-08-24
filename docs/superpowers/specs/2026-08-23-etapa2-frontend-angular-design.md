@@ -76,8 +76,10 @@ flowchart LR
   `administrador` — un guard de ruta redirige a `/rol` con un mensaje si
   el rol activo es `solicitante`, reflejando el mismo 403 real que daría
   la API): tabla Material con columnas asunto/área/categoría/prioridad/
-  estado/fecha; filtros de área/estado/categoría reflejados como query
-  params en la URL; paginación simple usando `limite`/`desplazamiento`
+  estado/fecha; filtros de área/estado/categoría mantenidos en el
+  formulario reactivo del componente (no reflejados en la URL —
+  limitación conocida, ver `etapa2-frontend/README.md`); paginación
+  simple usando `limite`/`desplazamiento`
   (ya soportados por `GET /solicitudes` desde la revisión final de
   Etapa 2).
 - **Detalle** (`/solicitudes/:id`, visible para los 3 roles): muestra
@@ -95,8 +97,9 @@ de errores HTTP centraliza la traducción a UI:
 - `403` → snackbar "Tu rol no tiene permiso para esto" + redirección a
   `/rol`.
 - `404` → pantalla dedicada (usada por el detalle).
-- `5xx` / error de red → snackbar genérico con opción de reintentar la
-  última acción.
+- `5xx` / error de red → snackbar genérico sin acción de reintentar
+  automática (limitación conocida — el usuario puede repetir la acción
+  manualmente).
 
 ## 5. Testing
 
