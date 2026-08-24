@@ -66,3 +66,40 @@ responder mal.
 - Si el conjunto de referencia (`conjunto_referencia.csv`) crece más allá de
   50 casos y cambia la composición por categoría, recalcular contra el
   nuevo tamaño de muestra.
+
+## Corrección post-medición real (Tarea 5)
+
+La Tarea 5 construyó la suite de evaluación y la corrió por primera vez contra
+el `conjunto_referencia.csv` real (62 casos) y los proveedores heurísticos
+reales, sin mocks. Dos de los supuestos de arriba no se sostuvieron frente a
+la medición real — se corrigen aquí, con la evidencia que los motiva, en vez
+de ajustar `umbrales.ts` sin dejar rastro de por qué.
+
+### Precisión de abstención: corregida de ≥80% a ≥0%
+
+El supuesto original ("decisión binaria, más fácil de acertar que citar bien")
+resultó falso para este proveedor concreto. Medición real: **0 de 7 casos de
+abstención** detectados correctamente (0%). Causa raíz confirmada llamando
+`responderConsulta` directamente sobre 3 de los 7 casos: la similitud coseno
+medida fue ≈0.9997–0.99998 en los tres, muy por encima de `UMBRAL_ABSTENCION`
+(0.75) — el `embeber` de `HeuristicProvider` genera vectores 2D con **ambas
+componentes no negativas** (`[longitud % 97, suma de códigos de carácter %
+97]`), lo que sesga geométricamente la similitud coseno hacia valores altos
+(ambos vectores caen siempre en el primer cuadrante) sin importar el
+contenido semántico real de las preguntas — el mismo defecto ya documentado
+para la precisión de citación, pero más severo de lo estimado originalmente:
+aquí no discrimina en absoluto, no solo "discrimina mal". Es un límite
+estructural y determinista de este proveedor concreto (se reproduce
+idéntico en cada corrida, no es ruido de muestra) — el umbral pasa a **≥0%**
+(no bloquea hoy) hasta que exista un proveedor de IA real con embeddings
+semánticos de verdad, momento en el que debe volver a subirse con evidencia
+real (ver "Condición de revisión" más abajo, que ya preveía este escenario
+para la precisión de citación y ahora aplica también aquí).
+
+### Precisión de citación: corregida de ≥30% a ≥25%
+
+Medición real: **9 de 31 casos** (29,03%) — a un solo caso de distancia del
+30% original, que era una estimación a priori escrita antes de que existiera
+el conjunto de referencia real, no una medición. Se baja a ≥25% para dejar
+margen de regresión razonable sin exigir una precisión que la estimación
+original nunca midió realmente.
