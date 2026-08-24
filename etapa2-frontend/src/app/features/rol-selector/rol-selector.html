@@ -1,0 +1,24 @@
+<div class="contenedor">
+  <h1>¿Con qué rol querés entrar?</h1>
+  <p>La API de Etapa 2 no tiene login real — esto simula el header <code>X-Role</code> que ya usa.</p>
+  <form [formGroup]="formulario" (ngSubmit)="continuar()">
+    <mat-form-field appearance="outline">
+      <mat-label>Rol</mat-label>
+      <mat-select formControlName="rol">
+        @for (opcion of opciones; track opcion.valor) {
+          <mat-option [value]="opcion.valor">{{ opcion.etiqueta }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Correo</mat-label>
+      <input matInput formControlName="nombre" type="email" placeholder="tu@correo.com" />
+      @if (formulario.controls.nombre.invalid && formulario.controls.nombre.touched) {
+        <mat-error>Ingresá un correo válido</mat-error>
+      }
+    </mat-form-field>
+
+    <button mat-flat-button type="submit">Continuar</button>
+  </form>
+</div>
