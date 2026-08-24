@@ -60,6 +60,7 @@ export class NuevaSolicitud {
       const control = this.formulario.get(campo);
       if (control && mensajes.length > 0) {
         control.setErrors({ servidor: mensajes[0] });
+        control.markAsTouched();
       }
     }
   }

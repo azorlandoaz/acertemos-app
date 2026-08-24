@@ -62,5 +62,6 @@ describe('NuevaSolicitud', () => {
     );
 
     expect(instancia.formulario.controls.area.errors?.['servidor']).toBe('El área no existe');
+    expect(instancia.formulario.controls.area.touched).toBe(true);
   });
 });
