@@ -19,7 +19,7 @@ _Pendiente de declarar en el formulario de inicio._
 | 2 — Autonomía e integración | Desarrollador IA Junior II | Completa — ver `etapa2-api/` |
 | 3 — Complejidad y calidad | Desarrollador IA Junior III | Completa — ver `etapa3-rag/` |
 | 4 — Arquitectura y orquestación | Ingeniero IA Middle I | Completa — ver `etapa4-orquestacion/` |
-| 5 — Estrategia técnica y evaluación | Ingeniero IA Middle II | Pendiente |
+| 5 — Estrategia técnica y evaluación | Ingeniero IA Middle II | Completa — ver `etapa5-estrategia/` |
 
 ## Documentación
 
