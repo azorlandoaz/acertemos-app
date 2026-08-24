@@ -1,0 +1,37 @@
+<div class="contenedor">
+  <h1>Nueva solicitud</h1>
+  <form [formGroup]="formulario" (ngSubmit)="enviar()">
+    <mat-form-field appearance="outline">
+      <mat-label>Asunto</mat-label>
+      <input matInput formControlName="asunto" />
+      @if (formulario.controls.asunto.invalid && formulario.controls.asunto.touched) {
+        <mat-error>{{ formulario.controls.asunto.errors?.['servidor'] ?? 'El asunto debe tener al menos 3 caracteres' }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="descripcion" rows="4"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Área</mat-label>
+      <input matInput formControlName="area" />
+      @if (formulario.controls.area.invalid && formulario.controls.area.touched) {
+        <mat-error>{{ formulario.controls.area.errors?.['servidor'] ?? 'El área es requerida' }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Solicitante</mat-label>
+      <input matInput formControlName="solicitante" type="email" />
+      @if (formulario.controls.solicitante.invalid && formulario.controls.solicitante.touched) {
+        <mat-error>{{ formulario.controls.solicitante.errors?.['servidor'] ?? 'Ingresá un correo válido' }}</mat-error>
+      }
+    </mat-form-field>
+
+    <button mat-flat-button type="submit" [disabled]="enviando()">
+      {{ enviando() ? 'Enviando...' : 'Crear solicitud' }}
+    </button>
+  </form>
+</div>

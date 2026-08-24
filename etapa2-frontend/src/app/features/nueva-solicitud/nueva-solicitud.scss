@@ -1,0 +1,10 @@
+.contenedor {
+  max-width: 480px;
+  margin: 2rem auto;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
