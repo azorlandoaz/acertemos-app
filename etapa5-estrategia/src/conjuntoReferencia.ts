@@ -97,6 +97,10 @@ export function cargarConjuntoReferencia(ruta: string): CasoReferencia[] {
   const filas = parsearCSV(contenido).filter((f) => f.some((campo) => campo.trim() !== ""));
   const [encabezado, ...datos] = filas;
 
+  if (!encabezado) {
+    throw new Error(`Archivo de conjunto de referencia vacío o sin encabezado: ${ruta}`);
+  }
+
   COLUMNAS.forEach((columna, indice) => {
     if (encabezado[indice] !== columna) {
       throw new Error(`Encabezado inesperado en columna ${indice}: esperaba "${columna}", encontro "${encabezado[indice]}"`);

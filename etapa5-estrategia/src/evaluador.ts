@@ -18,7 +18,7 @@ export async function evaluarCaso(
   umbralEscalamiento: number
 ): Promise<ResultadoCaso> {
   const tipo = tipoDeCaso(caso);
-  const inicio = Date.now();
+  const inicio = performance.now();
 
   if (tipo === "clasificacion") {
     const resultado = await clasificador.clasificar(caso.preguntaOTexto);
@@ -26,7 +26,7 @@ export async function evaluarCaso(
       idCaso: caso.idCaso,
       tipo,
       acierto: resultado.categoria === caso.respuestaOCategoriaEsperada,
-      latenciaMs: Date.now() - inicio,
+      latenciaMs: performance.now() - inicio,
       escalado: resultado.confianza < umbralEscalamiento,
     };
   }
@@ -41,7 +41,7 @@ export async function evaluarCaso(
     idCaso: caso.idCaso,
     tipo,
     acierto,
-    latenciaMs: Date.now() - inicio,
+    latenciaMs: performance.now() - inicio,
     escalado: resultado.citas.length === 0,
   };
 }

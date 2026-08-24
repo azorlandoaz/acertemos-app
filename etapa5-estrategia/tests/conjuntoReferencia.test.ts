@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -99,5 +101,31 @@ describe("cargarConjuntoReferencia (integracion con el archivo real committeado)
 
     const todosLosErrores = casos.flatMap((c) => validarCaso(c));
     expect(todosLosErrores, `errores de validacion: ${todosLosErrores.join("; ")}`).toEqual([]);
+  });
+});
+
+describe("cargarConjuntoReferencia (rutas de error)", () => {
+  let dirTemporal: string;
+
+  afterEach(() => {
+    if (dirTemporal) rmSync(dirTemporal, { recursive: true, force: true });
+  });
+
+  it("lanza error si el encabezado no coincide con las columnas esperadas", () => {
+    dirTemporal = mkdtempSync(path.join(tmpdir(), "conjunto-referencia-test-"));
+    const ruta = path.join(dirTemporal, "encabezado_malo.csv");
+    writeFileSync(ruta, "id_caso,texto_malo\nX,Y\n", "utf-8");
+
+    expect(() => cargarConjuntoReferencia(ruta)).toThrow();
+  });
+
+  it("lanza error si el archivo esta vacio o sin encabezado", () => {
+    dirTemporal = mkdtempSync(path.join(tmpdir(), "conjunto-referencia-test-"));
+    const ruta = path.join(dirTemporal, "vacio.csv");
+    writeFileSync(ruta, "", "utf-8");
+
+    expect(() => cargarConjuntoReferencia(ruta)).toThrow(
+      /vac[ií]o o sin encabezado/i
+    );
   });
 });
