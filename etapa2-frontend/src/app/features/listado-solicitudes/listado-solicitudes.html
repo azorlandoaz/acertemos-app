@@ -1,0 +1,72 @@
+<div class="contenedor">
+  <h1>Solicitudes</h1>
+
+  <form [formGroup]="filtros" (ngSubmit)="buscar()" class="filtros">
+    <mat-form-field appearance="outline">
+      <mat-label>Área</mat-label>
+      <input matInput formControlName="area" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Estado</mat-label>
+      <input matInput formControlName="estado" placeholder="Abierto o Escalado" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Categoría</mat-label>
+      <input matInput formControlName="categoria" />
+    </mat-form-field>
+    <button mat-flat-button type="submit">Buscar</button>
+  </form>
+
+  @if (cargando()) {
+    <p>Cargando...</p>
+  } @else if (solicitudes().length === 0) {
+    @if (pagina() > 0) {
+      <p>No hay más solicitudes.</p>
+    } @else {
+      <p>No hay solicitudes con estos filtros.</p>
+    }
+  } @else {
+    <table mat-table [dataSource]="solicitudes()">
+      <ng-container matColumnDef="asunto">
+        <th mat-header-cell *matHeaderCellDef>Asunto</th>
+        <td mat-cell *matCellDef="let s">{{ s.asunto }}</td>
+      </ng-container>
+      <ng-container matColumnDef="area">
+        <th mat-header-cell *matHeaderCellDef>Área</th>
+        <td mat-cell *matCellDef="let s">{{ s.area }}</td>
+      </ng-container>
+      <ng-container matColumnDef="categoria">
+        <th mat-header-cell *matHeaderCellDef>Categoría</th>
+        <td mat-cell *matCellDef="let s">{{ s.categoria ?? '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="prioridad">
+        <th mat-header-cell *matHeaderCellDef>Prioridad</th>
+        <td mat-cell *matCellDef="let s">{{ s.prioridad ?? '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let s">{{ s.estado }}</td>
+      </ng-container>
+      <ng-container matColumnDef="fechaCreacion">
+        <th mat-header-cell *matHeaderCellDef>Creada</th>
+        <td mat-cell *matCellDef="let s">{{ s.fechaCreacion | date: 'short' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let s">
+          <a mat-button [routerLink]="['/solicitudes', s.id]">Ver</a>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnas"></tr>
+    </table>
+  }
+
+  @if (!cargando()) {
+    <div class="paginacion">
+      <button mat-button (click)="paginaAnterior()" [disabled]="pagina() === 0">Anterior</button>
+      <span>Página {{ pagina() + 1 }}</span>
+      <button mat-button (click)="paginaSiguiente()" [disabled]="!haySiguientePagina()">Siguiente</button>
+    </div>
+  }
+</div>

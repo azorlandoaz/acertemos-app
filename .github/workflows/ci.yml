@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  etapa1-fundamentos:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: etapa1-fundamentos
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Pruebas unitarias (sin base de datos)
+        run: pytest -v -k "not test_esquema_bd and not test_sql_consultas"
+
+  etapa2-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: npm run build --workspace etapa2-api
+      - run: npm test --workspace etapa2-api
+
+  etapa3-rag:
+    runs-on: ubuntu-latest
+    needs: etapa2-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: npm run build --workspace etapa2-api
+      - run: npm run build --workspace etapa3-rag
+      - run: npm test --workspace etapa3-rag
