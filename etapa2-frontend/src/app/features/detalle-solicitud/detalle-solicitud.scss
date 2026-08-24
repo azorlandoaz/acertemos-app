@@ -1,0 +1,14 @@
+.contenedor {
+  max-width: 640px;
+  margin: 2rem auto;
+
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.5rem 1rem;
+  }
+
+  dt {
+    font-weight: 600;
+  }
+}

@@ -1,0 +1,15 @@
+<mat-toolbar color="primary">
+  <span>Mesa de Ayuda — Etapa 2</span>
+  <span class="separador"></span>
+  @if (sesion(); as s) {
+    @if (s.rol !== 'solicitante') {
+      <a mat-button routerLink="/solicitudes">Solicitudes</a>
+    }
+    <span class="rol-actual">{{ s.nombre }} ({{ s.rol }})</span>
+    <button mat-button (click)="cambiarRol()">Cambiar rol</button>
+  }
+</mat-toolbar>
+
+<main>
+  <router-outlet />
+</main>
