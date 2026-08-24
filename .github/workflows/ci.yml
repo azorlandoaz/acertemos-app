@@ -57,3 +57,20 @@ jobs:
       - run: npm run build --workspace etapa4-orquestacion
       - name: Pruebas unitarias (sin infraestructura externa)
         run: npm test --workspace etapa4-orquestacion -- --exclude "**/integracion/**" --exclude "**/migracion.test.ts"
+
+  etapa5-estrategia:
+    runs-on: ubuntu-latest
+    needs: [etapa2-api, etapa3-rag]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: npm run build --workspace etapa2-api
+      - run: npm run build --workspace etapa3-rag
+      - run: npm run build --workspace etapa5-estrategia
+      - name: Generar indice vectorial real (HeuristicProvider) para la suite de evaluacion
+        run: npm run ingestar --workspace etapa3-rag
+      - name: Suite de evaluacion (falla si la precision/latencia/escalamiento no cumplen metricas_previas.md)
+        run: npm test --workspace etapa5-estrategia
