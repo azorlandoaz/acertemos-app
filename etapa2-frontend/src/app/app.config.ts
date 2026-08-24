@@ -4,11 +4,12 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { xRoleInterceptor } from './core/x-role.interceptor';
+import { errorInterceptor } from './core/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([xRoleInterceptor])),
+    provideHttpClient(withInterceptors([xRoleInterceptor, errorInterceptor])),
   ],
 };
