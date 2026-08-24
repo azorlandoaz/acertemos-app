@@ -20,7 +20,11 @@
   @if (cargando()) {
     <p>Cargando...</p>
   } @else if (solicitudes().length === 0) {
-    <p>No hay solicitudes con estos filtros.</p>
+    @if (pagina() > 0) {
+      <p>No hay más solicitudes.</p>
+    } @else {
+      <p>No hay solicitudes con estos filtros.</p>
+    }
   } @else {
     <table mat-table [dataSource]="solicitudes()">
       <ng-container matColumnDef="asunto">
@@ -56,7 +60,9 @@
       <tr mat-header-row *matHeaderRowDef="columnas"></tr>
       <tr mat-row *matRowDef="let row; columns: columnas"></tr>
     </table>
+  }
 
+  @if (!cargando()) {
     <div class="paginacion">
       <button mat-button (click)="paginaAnterior()" [disabled]="pagina() === 0">Anterior</button>
       <span>Página {{ pagina() + 1 }}</span>

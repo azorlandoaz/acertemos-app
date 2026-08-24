@@ -49,9 +49,9 @@ describe('SolicitudesApiService', () => {
   });
 
   it('listar() hace GET /api/solicitudes con los filtros como query params', () => {
-    service.listar({ area: 'TI', estado: 'Abierto', limite: 10, desplazamiento: 0 }).subscribe();
+    service.listar({ area: 'TI', estado: 'Abierto', categoria: 'Hardware', limite: 10, desplazamiento: 0 }).subscribe();
     const req = httpMock.expectOne(
-      (r) => r.url === '/api/solicitudes' && r.params.get('area') === 'TI' && r.params.get('estado') === 'Abierto' && r.params.get('limite') === '10' && r.params.get('desplazamiento') === '0'
+      (r) => r.url === '/api/solicitudes' && r.params.get('area') === 'TI' && r.params.get('estado') === 'Abierto' && r.params.get('categoria') === 'Hardware' && r.params.get('limite') === '10' && r.params.get('desplazamiento') === '0'
     );
     expect(req.request.method).toBe('GET');
     req.flush([solicitudEjemplo]);
