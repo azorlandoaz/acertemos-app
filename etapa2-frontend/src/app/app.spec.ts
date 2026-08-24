@@ -1,23 +1,36 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { App } from './app';
+import { RolService } from './core/rol.service';
 
 describe('App', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    localStorage.clear();
+    TestBed.configureTestingModule({
       imports: [App],
-    }).compileComponents();
+      providers: [provideRouter([])],
+    });
   });
 
-  it('should create the app', () => {
+  afterEach(() => localStorage.clear());
+
+  it('se crea correctamente', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('no muestra el boton de cambiar rol sin sesion activa', () => {
     const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, etapa2-frontend');
+    fixture.detectChanges();
+    const boton = fixture.nativeElement.querySelector('button');
+    expect(boton).toBeNull();
+  });
+
+  it('muestra el boton de cambiar rol cuando hay sesion activa', () => {
+    TestBed.inject(RolService).establecer({ rol: 'administrador', nombre: 'ana@ejemplo.com' });
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const boton = fixture.nativeElement.querySelector('button');
+    expect(boton?.textContent).toContain('Cambiar rol');
   });
 });
