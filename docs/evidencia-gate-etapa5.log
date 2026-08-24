@@ -1,0 +1,56 @@
+=== Corrida 1: umbral precisionMinimaPorCategoria subido a proposito (debe fallar) ===
+
+Nota de desviacion respecto al plan original: el brief pedia subir el umbral
+a 0.99 para hacerlo "inalcanzable". Contra los datos reales del conjunto de
+referencia, las 3 categorias con >=3 casos (Hardware 3/3, Compras 3/3, Sin
+clasificar 7/7) miden EXACTAMENTE 1.0 (100%) de precision, asi que 0.99
+seguia pasando (1.0 >= 0.99) y no demostraba nada. Se uso 1.01 en su lugar,
+que es matematicamente inalcanzable siempre (precision = aciertos/total
+nunca puede superar 1.0), para garantizar que la corrida de regresion
+realmente fallara.
+
+Comando: NO_COLOR=1 CI=1 npx vitest run
+
+ RUN  v2.1.9 C:/Users/User/Documents/projects/Acertemos_Test/.claude/worktrees/etapa5-estrategia/etapa5-estrategia
+
+ ✓ tests/conjuntoReferencia.test.ts (9 tests) 12ms
+ ❯ tests/evaluador.test.ts (5 tests | 1 failed) 24ms
+   × suite de evaluacion contra conjunto_referencia.csv (gate real) > cumple los umbrales minimos definidos en metricas_previas.md 19ms
+     → precision en categoria "Hardware" (3/3): expected 1 to be greater than or equal to 1.01
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/evaluador.test.ts > suite de evaluacion contra conjunto_referencia.csv (gate real) > cumple los umbrales minimos definidos en metricas_previas.md
+AssertionError: precision en categoria "Hardware" (3/3): expected 1 to be greater than or equal to 1.01
+ ❯ tests/evaluador.test.ts:75:11
+     73|           datos.precision,
+     74|           `precision en categoria "${categoria}" (${datos.aciertos}/${…
+     75|         ).toBeGreaterThanOrEqual(UMBRALES.precisionMinimaPorCategoria);
+       |           ^
+     76|       }
+     77|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 13 passed (14)
+   Start at  19:36:32
+   Duration  1.09s (transform 283ms, setup 0ms, collect 453ms, tests 36ms, environment 3ms, prepare 444ms)
+
+=== Corrida 2: umbral restaurado a los valores commiteados de umbrales.ts
+    (precisionMinimaPorCategoria: 0.5, precisionMinimaCitacion: 0.25,
+    precisionMinimaAbstencion: 0 — estos dos ultimos corregidos con
+    evidencia real en metricas_previas.md, ver addendum "Correccion
+    post-medicion real (Tarea 5)") (debe pasar) ===
+
+Comando: NO_COLOR=1 CI=1 npx vitest run
+
+ RUN  v2.1.9 C:/Users/User/Documents/projects/Acertemos_Test/.claude/worktrees/etapa5-estrategia/etapa5-estrategia
+
+ ✓ tests/conjuntoReferencia.test.ts (9 tests) 11ms
+ ✓ tests/evaluador.test.ts (5 tests) 12ms
+
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  19:37:20
+   Duration  946ms (transform 161ms, setup 0ms, collect 299ms, tests 23ms, environment 1ms, prepare 458ms)
